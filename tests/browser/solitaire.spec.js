@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {newGame,validate} from '../../src/klondike.js';
 import {puzzle,longColumn} from './fixtures.js';
+import {deploymentServer} from './server.js';
 const key='classic-win-klondike-v1';
 async function load(page,state=newGame(123)) {
   await page.addInitScript(({key,state})=>{if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(state));},{key,state});
@@ -8,7 +9,7 @@ async function load(page,state=newGame(123)) {
 }
 const pile=(page,name)=>page.getByRole('group',{name,exact:true});
 async function saved(page){return page.evaluate(key=>JSON.parse(localStorage.getItem(key)),key);}
-async function tapCard(page,name){await page.getByRole('button',{name,exact:true}).tap();}
+async function tapCard(page,name){await page.getByRole('button',{name,exact:true}).tap({position:{x:12,y:12}});}
 async function geometry(page) {
   return page.evaluate(()=>{
     const rect=e=>e.getBoundingClientRect();
@@ -39,7 +40,7 @@ for(const [width,height] of [[375,667],[390,844],[430,932],[768,1024],[1440,900]
     await page.screenshot({path:testInfo.outputPath(`initial-${width}.png`),fullPage:true});
     await page.evaluate(({key,state})=>localStorage.setItem(key,JSON.stringify(state)),{key,state:longColumn()});
     // Restore on a page without the initial seed hook.
-    const restored=await page.context().newPage();await restored.goto('/');
+    const restored=await page.context().newPage();await restored.setViewportSize({width,height});await restored.goto('/');
     g=await geometry(restored);
     expect(g.overflow).toBe(false);expect(g.contained).toBe(true);
     expect(g.targets.every(t=>t.width>=44&&t.exposed>=44&&t.readable)).toBe(true);
@@ -91,12 +92,17 @@ test('waste ace to foundation and invalid move leaves state intact',async({page}
   await tapCard(page,'A of clubs');await tapCard(page,'Empty foundation 1');
   await expect(pile(page,'Foundation 1').locator('.card')).toHaveCount(1);
 });
-test('offline shell, navigation and reconnection preserve saved game',async({page,context})=>{
-  await load(page);await page.evaluate(()=>navigator.serviceWorker.ready);
-  await page.reload();await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
-  await page.getByRole('button',{name:/^Draw 1 /}).tap();const state=await saved(page);
-  await context.setOffline(true);await page.reload();await expect(page.locator('.stack')).toHaveCount(7);
-  expect(await saved(page)).toEqual(state);
-  await context.setOffline(false);await page.reload();await expect(page.locator('.stack')).toHaveCount(7);
-  expect(await saved(page)).toEqual(state);
+test('offline shell, navigation and reconnection preserve saved game',async({page})=>{
+  const deployment=await deploymentServer();
+  try {
+    await page.goto(deployment.url);await page.evaluate(()=>navigator.serviceWorker.ready);
+    await page.reload();await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
+    await page.getByRole('button',{name:/^Draw 1 /}).tap();const state=await saved(page);
+    deployment.disconnected=true;
+    // Network requests now fail at the socket; the complete shell must suffice.
+    await page.reload();await expect(page.locator('.stack')).toHaveCount(7);
+    expect(await saved(page)).toEqual(state);
+    deployment.disconnected=false;await page.reload();await expect(page.locator('.stack')).toHaveCount(7);
+    expect(await saved(page)).toEqual(state);
+  } finally {await deployment.close();}
 });
