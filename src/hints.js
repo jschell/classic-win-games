@@ -6,7 +6,7 @@ export function positionKey(s) {
   // same rank/suit are interchangeable too. Counters do not change a position.
   const pile=p=>p.map(c=>`${c.rank}${c.suit}${c.up?'+':'-'}`).join(',');
   const group=ps=>(ps||[]).map(pile).sort();
-  return JSON.stringify([gameOf(s),s.draw,group(s.tableau),group(s.cells),
+  return JSON.stringify([gameOf(s),s.draw,s.suits,group(s.tableau),group(s.cells),
     group(s.foundations),group(s.completed),pile(s.stock||[]),pile(s.waste||[])]);
 }
 function features(s) {
@@ -32,7 +32,7 @@ function reason(before,after) {
   if(b.covered<a.covered)return 'Reveals a covered card.';
   if(b.empty>a.empty)return 'Frees a column.';
   if(b.cells>a.cells)return 'Frees a cell.';
-  return 'Joins separated sequences.';
+  return gameOf(before)==='spider'?'Joins same-suit sequences.':'Joins separated sequences.';
 }
 export function candidates(s,move) {
   const spider=gameOf(s)==='spider',result=[];

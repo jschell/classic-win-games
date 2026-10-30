@@ -8,7 +8,7 @@ import {positionKey} from './hints.js';
 const $=id=>document.getElementById(id);
 const games={klondike,freecell,spider};
 const names={klondike:'Klondike',freecell:'FreeCell',spider:'Spider'};
-let game,engine,key;
+let game,engine,key,spiderSuits=1;
 let state, history=[], selected=null, recent=[];
 function remember() {
   const fingerprint=positionKey(state);
@@ -16,11 +16,17 @@ function remember() {
   recent=recent.slice(-128);
   try{localStorage.setItem(`${key}-hint-trail`,JSON.stringify(recent));}catch{}
 }
-function loadGame() {
+function loadGame(mode) {
   game=Object.hasOwn(games,location.hash.slice(1))?location.hash.slice(1):'klondike';engine=games[game];
-  key=`classic-win-${game}-v1`;history=[];selected=null;
-  try {const saved=JSON.parse(localStorage.getItem(key));state=engine.validate(saved)?saved:engine.newGame();}
-  catch {state=engine.newGame();}
+  try{spiderSuits=Number(localStorage.getItem('classic-win-spider-suits-v1'));}catch{spiderSuits=1;}
+  if(spider.SUIT_MODES.includes(mode))spiderSuits=mode;
+  if(!spider.SUIT_MODES.includes(spiderSuits))spiderSuits=1;
+  // Keep the original one-suit key; existing boards need no migration.
+  key=game==='spider'&&spiderSuits!==1?`classic-win-spider-${spiderSuits}-v1`:`classic-win-${game}-v1`;
+  history=[];selected=null;
+  const fresh=()=>game==='spider'?spider.newGame(undefined,spiderSuits):engine.newGame();
+  try {const saved=JSON.parse(localStorage.getItem(key));state=engine.validate(saved)&&(game!=='spider'||saved.suits===spiderSuits)?saved:fresh();}
+  catch {state=fresh();}
   try{recent=JSON.parse(localStorage.getItem(`${key}-hint-trail`));}catch{recent=[];}
   if(!Array.isArray(recent)||recent.some(p=>typeof p!=='string')||recent.at(-1)!==positionKey(state))recent=[];
   remember();
@@ -29,13 +35,13 @@ function loadGame() {
     if(link.hash===`#${game}`)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   }
   $('draw-control').hidden=game!=='klondike';$('deal-form').hidden=game==='klondike';
-  $('spider-controls').hidden=game!=='spider';
+  $('spider-controls').hidden=game!=='spider';$('spider-suits').value=String(spiderSuits);
   let layout='fit';try{layout=localStorage.getItem('classic-win-spider-layout-v1')==='large'?'large':'fit';}catch{}
   $('spider-layout').value=layout;document.querySelector('main').dataset.layout=layout;
   $('deal-number').value=String(state.seed);
   $('board').setAttribute('aria-label',`${names[game]} game board`);
   $('help').textContent=game==='spider'
-    ?'Spider · One suit. Build down by rank; move an exposed descending sequence together. Any card or sequence can fill an empty column. Complete King-to-Ace runs are removed automatically. Fill every column before dealing a row. Tap again to cancel selection. Larger cards scroll sideways; long columns scroll down.'
+    ?`Spider · ${spiderSuits} ${spiderSuits===1?'suit':'suits'}. Build down by rank regardless of suit. Only descending same-suit sequences move together; a mixed-suit stack must be separated. Any card or movable sequence can fill an empty column. Complete same-suit King-to-Ace runs are removed automatically. Fill every column before dealing a row. Each suit mode keeps its own saved deal. Tap again to cancel selection. Larger cards scroll sideways; long columns scroll down.`
     :game==='freecell'
     ?'Build columns down in alternating colors. Any card can fill an empty column. Each cell holds one card. Build homes from Ace to King by suit. Tap an exposed card or sequence, then its destination; tap again to cancel. Sequence moves require enough empty cells and columns.'
     :'Column labels show covered-card counts (↓). Tap or click a face-up card, then its destination. Tap the selected card again to cancel. Tap stock to draw; only the top waste card is playable. Select a card and tap a foundation to move it.';
@@ -73,7 +79,7 @@ function clickPile(kind,index,start) {
 }
 function render(message='') {
   renderBoard({state,selected,onPile:clickPile,game,top:$('top'),tableau:$('tableau')});
-  $('status').textContent=engine.won(state)?'You won!':`Moves: ${state.moves} · Deal: ${state.seed}`+(game==='spider'?` · Runs: ${state.completed.filter(p=>p.length).length}/8`:'');
+  $('status').textContent=engine.won(state)?'You won!':`Moves: ${state.moves} · Deal: ${state.seed}`+(game==='spider'?` · ${state.suits} ${state.suits===1?'suit':'suits'} · Runs: ${state.completed.filter(p=>p.length).length}/8`:'');
   const chosen=selected?pileCards(state,selected.kind,selected.index)[selected.start]:null;
   const capacity=game==='freecell'?` Empty cells: ${state.cells.filter(p=>!p.length).length}.` : '';
   $('selection').textContent=message||(chosen?'Selected '+label(chosen)+chosen.suit+' — tap a destination or tap again to cancel.'+capacity:'');
@@ -81,7 +87,7 @@ function render(message='') {
   $('undo').disabled=!history.length;
 }
 function deal(seed) {
-  history=[];state=game==='klondike'?engine.newGame(seed,Number($('draw').value)):engine.newGame(seed);selected=null;
+  history=[];state=game==='klondike'?engine.newGame(seed,Number($('draw').value)):game==='spider'?spider.newGame(seed,spiderSuits):engine.newGame(seed);selected=null;
   $('deal-number').value=String(state.seed);recent=[];remember();persist();render();
 }
 $('new').onclick=()=>{
@@ -94,6 +100,12 @@ $('restart').onclick=()=>{if(confirm('Restart this deal?'))deal(state.seed);};
 $('deal-form').onsubmit=e=>{e.preventDefault();if($('deal-number').reportValidity()&&confirm('Play this numbered deal?'))deal(Number($('deal-number').value));};
 $('undo').onclick=()=>{
   if(history.length){state=game==='klondike'?{...history.pop(),draw:state.draw}:history.pop();selected=null;const i=recent.lastIndexOf(positionKey(state));recent=i<0?[]:recent.slice(0,i+1);remember();persist();render();}
+};
+$('spider-suits').onchange=()=>{
+  persist();
+  spiderSuits=Number($('spider-suits').value);
+  try{localStorage.setItem('classic-win-spider-suits-v1',String(spiderSuits));}catch{}
+  loadGame(spiderSuits);
 };
 $('spider-layout').onchange=()=>{
   document.querySelector('main').dataset.layout=$('spider-layout').value;

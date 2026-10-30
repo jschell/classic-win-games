@@ -33,7 +33,7 @@ button:focus-visible,select:focus-visible {outline:3px solid #ffd451;outline-off
 }
 .stack .card {grid-column:1;align-self:start}
 .card-corner {position:absolute;top:4px;left:4px;line-height:1;white-space:nowrap;pointer-events:none}
-.card.red {color:#b62332}
+.card.red,.run-marker.complete.red {color:#b62332}
 .card.back {color:#d8e9f4;background:repeating-linear-gradient(45deg,#225c96,#225c96 5px,#164676 5px,#164676 10px);border:2px solid white}
 .card.back:disabled {opacity:1;cursor:default}
 .card.selected {outline:3px solid #ffd451;outline-offset:-3px}

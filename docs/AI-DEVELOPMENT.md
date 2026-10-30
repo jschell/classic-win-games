@@ -8,4 +8,4 @@ Do not change traditional rules to make a game seem more fun. Use HTML/CSS and v
 
 ## Remaining acceptance work
 
-Klondike: comprehensive legal move tests, move history persistence, hint coverage, stock recycle rule variants, auto-foundation, win-state browser tests, mobile Safari manual testing, and PWA icons. FreeCell is implemented; see [its rules and verification](freecell.md). Spider one-suit is implemented; see [its rules and verification](spider.md). Native iPhone testing remains for all three games. Two/four-suit Spider and Hearts follow.
+Klondike: comprehensive legal move tests, move history persistence, hint coverage, stock recycle rule variants, auto-foundation, win-state browser tests, mobile Safari manual testing, and PWA icons. FreeCell is implemented; see [its rules and verification](freecell.md). Spider one/two/four-suit modes are implemented; see [its rules and verification](spider.md). Native iPhone testing remains for all three games. Hearts follows.

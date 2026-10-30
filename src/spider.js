@@ -1,19 +1,23 @@
-import {shuffle} from './cards.js';
+import {shuffle,suits as cardSuits} from './cards.js';
 import {chooseHint,unseen} from './hints.js';
 
 export const MAX_SEED=2147483647;
-// Distinct IDs identify the eight copies of each rank in one-suit Spider.
-// Rules below still inspect suit, allowing later two/four-suit deck variants.
-export function deck() {
-  return Array.from({length:104},(_,id)=>({id,rank:id%13+1,suit:'♠',red:false,up:false}));
+export const SUIT_MODES=[1,2,4];
+// Stable IDs and shuffle order preserve existing one-suit numbered deals.
+export function deck(suits=1) {
+  if(!SUIT_MODES.includes(suits))throw new RangeError('Spider uses 1, 2 or 4 suits');
+  return Array.from({length:104},(_,id)=>{
+    const suit=cardSuits[Math.floor(id/13)%suits];
+    return {id,rank:id%13+1,suit,red:suit==='♥'||suit==='♦',up:false};
+  });
 }
-export function newGame(seed=(Date.now()%MAX_SEED)||1) {
+export function newGame(seed=(Date.now()%MAX_SEED)||1,suits=1) {
   if(!Number.isInteger(seed)||seed<1||seed>MAX_SEED)throw new RangeError('Deal number must be 1–2147483647');
-  const cards=shuffle(deck(),seed),tableau=Array.from({length:10},()=>[]);
+  const cards=shuffle(deck(suits),seed),tableau=Array.from({length:10},()=>[]);
   for(let row=0;row<5;row++)for(const pile of tableau)pile.push(cards.pop());
   for(let i=0;i<4;i++)tableau[i].push(cards.pop());
   tableau.forEach(p=>{p.at(-1).up=true;});
-  return {game:'spider',version:1,suits:1,seed,moves:0,tableau,stock:cards,completed:Array.from({length:8},()=>[])};
+  return {game:'spider',version:1,suits,seed,moves:0,tableau,stock:cards,completed:Array.from({length:8},()=>[])};
 }
 export function isSequence(cards) {
   return cards.length>0&&cards.every((c,i)=>c.up&&(!i||cards[i-1].rank===c.rank+1&&cards[i-1].suit===c.suit));
@@ -53,11 +57,11 @@ export function hint(s,recent=[]) {
   return chooseHint(s,move,recent)||(canDeal(s)&&unseen(dealRow(s),recent)?{type:'deal',reason:'No improving sequence move found.'}:null);
 }
 export function validate(s) {
-  if(!s||s.game!=='spider'||s.version!==1||s.suits!==1||!Number.isInteger(s.seed)||s.seed<1||s.seed>MAX_SEED||!Number.isInteger(s.moves)||s.moves<0)return false;
+  if(!s||s.game!=='spider'||s.version!==1||!SUIT_MODES.includes(s.suits)||!Number.isInteger(s.seed)||s.seed<1||s.seed>MAX_SEED||!Number.isInteger(s.moves)||s.moves<0)return false;
   if(!Array.isArray(s.tableau)||s.tableau.length!==10||!s.tableau.every(Array.isArray)||
     !Array.isArray(s.stock)||s.stock.length>50||s.stock.length%10||
     !Array.isArray(s.completed)||s.completed.length!==8||!s.completed.every(p=>Array.isArray(p)&&(p.length===0||p.length===13)))return false;
-  const cards=[...s.stock,...s.tableau.flat(),...s.completed.flat()],canonical=deck();
+  const cards=[...s.stock,...s.tableau.flat(),...s.completed.flat()],canonical=deck(s.suits);
   if(cards.length!==104||new Set(cards.map(c=>c?.id)).size!==104)return false;
   if(!cards.every(c=>c&&canonical[c.id]&&typeof c.up==='boolean'&&['id','rank','suit','red'].every(k=>c[k]===canonical[c.id][k])))return false;
   if(s.stock.some(c=>c.up))return false;
