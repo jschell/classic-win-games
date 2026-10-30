@@ -43,8 +43,8 @@ for(const [width,height] of [[375,667],[390,844],[430,932],[768,1024],[1440,900]
     g=await geometry(restored);
     expect(g.overflow).toBe(false);expect(g.contained).toBe(true);
     expect(g.targets.every(t=>t.width>=44&&t.exposed>=44&&t.readable)).toBe(true);
-    await restored.getByRole('button',{name:'A of spades',exact:true}).scrollIntoViewIfNeeded();
-    await expect(restored.getByRole('button',{name:'A of spades',exact:true})).toBeInViewport();
+    await pile(restored,'Column 1').locator('.card').last().scrollIntoViewIfNeeded();
+    await expect(pile(restored,'Column 1').locator('.card').last()).toBeInViewport();
     await restored.screenshot({path:testInfo.outputPath(`long-${width}.png`),fullPage:true});
   });
 }
@@ -73,9 +73,9 @@ test('touch selection, sequences, reveal, king, waste, foundations, undo, restor
 test('draw modes, repeated stock taps, recycle, undo, new deal',async({page})=>{
   await load(page);
   await page.getByRole('button',{name:/^Draw 1 /}).tap();expect((await saved(page)).waste).toHaveLength(1);
-  await page.getByLabel('Draw',{exact:true}).selectOption('3');
+  await page.getByRole('combobox',{name:'Draw',exact:true}).selectOption('3');
   await page.getByRole('button',{name:'Undo',exact:true}).tap();
-  expect((await saved(page)).draw).toBe(3);await expect(page.getByLabel('Draw',{exact:true})).toHaveValue('3');
+  expect((await saved(page)).draw).toBe(3);await expect(page.getByRole('combobox',{name:'Draw',exact:true})).toHaveValue('3');
   for(let i=0;i<8;i++)await page.getByRole('button',{name:/^Draw 3 /}).tap();
   expect((await saved(page)).waste).toHaveLength(24);
   await tapCard(page,'Recycle waste');expect((await saved(page)).stock).toHaveLength(24);
