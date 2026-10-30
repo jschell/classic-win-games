@@ -3,3 +3,7 @@
 :root{--tableau-step:clamp(28px,4.2vw,38px)}
 .stack .card{position:absolute;left:0}
 @media(max-width:600px){:root{--tableau-step:clamp(32px,8.5vw,44px)}.pile.stack{min-height:calc(13 * var(--tableau-step) + 110px)}.stack .card{border-radius:5px}.card.back{border-width:2px}.piles{gap:3px}}
+
+/* Place the identifying rank/suit in the exposed strip, not the card center. */
+.card{position:relative}.card-corner{position:absolute;top:5px;left:6px;line-height:1;white-space:nowrap;font-size:clamp(11px,2.8vw,22px)}
+@media(max-width:600px){.card-corner{top:4px;left:4px;font-size:clamp(12px,3.2vw,17px)}.stack .card{overflow:hidden}}
