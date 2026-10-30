@@ -14,6 +14,14 @@ const saved=(page,game)=>page.evaluate(key=>JSON.parse(localStorage.getItem(key)
 const pile=(page,name)=>page.getByRole('group',{name,exact:true});
 
 for(const [game,fixture] of Object.entries({klondike:puzzle,freecell:freePuzzle})) {
+  test(`${game} rapid touch taps cancel without sending a card home`,async({page})=>{
+    await load(page,game,fixture());
+    const before=await saved(page,game);
+    const ace=page.getByRole('button',{name:'A of clubs',exact:true});
+    await ace.tap();await ace.tap();
+    expect(await saved(page,game)).toEqual(before);
+    await expect(page.locator('.selected')).toHaveCount(0);
+  });
   test(`${game} desktop double-click sends a top card home and Undo survives reload`,async({page})=>{
     await load(page,game,fixture());
     await page.getByRole('button',{name:'A of clubs',exact:true}).dblclick();

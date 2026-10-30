@@ -139,9 +139,15 @@ export function renderBoard({
         onPile(kind, index, i);
       });
       if (c.up && kind !== "stock") {
+        let pointerType;
+        el.addEventListener("pointerdown", (e) => {
+          pointerType = e.pointerType;
+        });
         el.addEventListener("dblclick", (e) => {
           e.stopPropagation();
-          onFoundation?.(kind, index, i);
+          // Chromium can synthesize dblclick after rapid touch taps. Touch
+          // keeps select/cancel semantics; this shortcut belongs to the mouse.
+          if (pointerType === "mouse") onFoundation?.(kind, index, i);
         });
         el.draggable = true;
         el.addEventListener("dragstart", (e) => {
