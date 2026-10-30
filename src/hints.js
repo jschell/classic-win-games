@@ -6,7 +6,9 @@ export function positionKey(s) {
   // same rank/suit are interchangeable too. Counters do not change a position.
   const pile=p=>p.map(c=>`${c.rank}${c.suit}${c.up?'+':'-'}`).join(',');
   const group=ps=>(ps||[]).map(pile).sort();
-  return JSON.stringify([gameOf(s),s.draw,s.suits,group(s.tableau),group(s.cells),
+  // Preserve existing one-suit/other-game trail keys across this deployment.
+  const game=gameOf(s)==='spider'&&s.suits!==1?`spider-${s.suits}`:gameOf(s);
+  return JSON.stringify([game,s.draw,group(s.tableau),group(s.cells),
     group(s.foundations),group(s.completed),pile(s.stock||[]),pile(s.waste||[])]);
 }
 function features(s) {

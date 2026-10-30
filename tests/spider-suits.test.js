@@ -53,4 +53,6 @@ for(const suits of [2,4]) {
 test('unsupported Spider suit modes fail without accepting corrupt saves; one-suit defaults remain unchanged',()=>{
   for(const suits of [0,3,5,'2',null,NaN]){assert.throws(()=>deck(suits),RangeError);assert.throws(()=>newGame(1,suits),RangeError);assert.equal(validate({...newGame(1),suits}),false);}
   assert.deepEqual(deck(),deck(1));assert.deepEqual(newGame(123),newGame(123,1));
+  assert.equal(JSON.parse(positionKey(newGame(123)))[0],'spider');
+  assert.equal(JSON.parse(positionKey(newGame(123))).length,8);
 });

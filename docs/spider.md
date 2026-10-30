@@ -116,7 +116,8 @@ the selected mode. Unsupported modes are rejected by the pure rules API.
 The existing move/settle rules now operate on parameterized decks. Red completed
 run markers display their suit and expose suit names to screen readers. Hints
 already count same-suit joins; candidate generation never treats a mixed-suit
-suffix as movable. Suit count is also included in position identity.
+suffix as movable. Suit count is also included in position identity. Existing one-suit, FreeCell
+and Klondike hint keys retain their exact earlier encoding.
 
 `tests/spider-suits.test.js` adds 13 unit cases: deck distributions, invalid modes,
 seed replay, mixed/same-suit movement, rank-only destination placement, run
@@ -129,4 +130,10 @@ in Chromium/WebKit), bringing the suite to 108: initial/mixed long columns at
 all five viewports, red/black rank/suit readability, fit/larger views, touch
 moves/rejection, hint choices, same-suit completion, final win/Undo, separate
 legacy/mode saves, remembered preference, replay/Restart, invalid preference/save recovery, blocked storage and offline switching.
-Browser execution results and screenshots are recorded in the PR after CI.
+Source commit `36563ac382e4c03331715d06ebcf09f4246dbbb5` passed all **52 unit and
+108 browser tests** without retries in [CI run 41077797697](https://github.com/jschell/classic-win-games/actions/runs/41077797697).
+Reviewed real WebKit screenshots at 375px for [two suits](evidence/spider-2-suits-375.png)
+and [four suits](evidence/spider-4-suits-375.png), plus the four-suit desktop
+capture. The final compatibility/evidence commit retains old hint-key encoding
+and adds exact rendered rank/suit checks; its CI and production verification
+are recorded in the PR.

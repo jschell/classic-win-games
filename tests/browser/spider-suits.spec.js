@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {newGame,validate} from '../../src/spider.js';
 import {positionKey} from '../../src/hints.js';
+import {label} from '../../src/cards.js';
 import {multiPuzzle,multiCompletion,multiNearWin,multiLong} from './spider-suit-fixtures.js';
 import {deploymentServer} from './server.js';
 const key=suits=>suits===1?'classic-win-spider-v1':`classic-win-spider-${suits}-v1`;
@@ -30,6 +31,7 @@ for(const suits of [2,4]) {
   for(const [width,height] of [[375,667],[390,844],[430,932],[768,1024],[1440,900]])test(`${suits}-suit initial and mixed long columns ${width}x${height}`,async({page},info)=>{
     await page.setViewportSize({width,height});await load(page,suits);
     await expect(page.locator('.stack .card')).toHaveCount(54);await expect(page.locator('.stack .back')).toHaveCount(44);
+    expect(await page.locator('.stack .card:not(.back) .card-corner').allTextContents()).toEqual(newGame(123,suits).tableau.map(p=>label(p.at(-1))+p.at(-1).suit));
     let g=await geometry(page);expect(g.overflow).toBe(false);expect(g.innerScroll).toBe(false);expect(g.cards.every(c=>c.readable&&c.contained)).toBe(true);
     await expect(page.locator('.stack .card.red').first()).toHaveCSS('color','rgb(182, 35, 50)');
     await page.screenshot({path:info.outputPath(`spider-${suits}-suits-${width}.png`),fullPage:true});
