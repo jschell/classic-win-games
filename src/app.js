@@ -3,17 +3,27 @@ import * as freecell from './freecell.js';
 import * as spider from './spider.js';
 import {renderBoard,pileCards} from './board.js';
 import {label} from './cards.js';
+import {positionKey} from './hints.js';
 
 const $=id=>document.getElementById(id);
 const games={klondike,freecell,spider};
 const names={klondike:'Klondike',freecell:'FreeCell',spider:'Spider'};
 let game,engine,key;
-let state, history=[], selected=null;
+let state, history=[], selected=null, recent=[];
+function remember() {
+  const fingerprint=positionKey(state);
+  if(recent.at(-1)!==fingerprint)recent.push(fingerprint);
+  recent=recent.slice(-128);
+  try{localStorage.setItem(`${key}-hint-trail`,JSON.stringify(recent));}catch{}
+}
 function loadGame() {
   game=Object.hasOwn(games,location.hash.slice(1))?location.hash.slice(1):'klondike';engine=games[game];
   key=`classic-win-${game}-v1`;history=[];selected=null;
   try {const saved=JSON.parse(localStorage.getItem(key));state=engine.validate(saved)?saved:engine.newGame();}
   catch {state=engine.newGame();}
+  try{recent=JSON.parse(localStorage.getItem(`${key}-hint-trail`));}catch{recent=[];}
+  if(!Array.isArray(recent)||recent.some(p=>typeof p!=='string')||recent.at(-1)!==positionKey(state))recent=[];
+  remember();
   document.querySelector('main').dataset.game=game;
   for(const link of document.querySelectorAll('nav a')) {
     if(link.hash===`#${game}`)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
@@ -38,7 +48,7 @@ function persist() {
 }
 function commit(next) {
   if(!next)return;
-  history.push(state);state=next;selected=null;persist();render();
+  history.push(state);state=next;selected=null;remember();persist();render();
 }
 function clickPile(kind,index,start) {
   if(kind==='stock'){
@@ -72,46 +82,34 @@ function render(message='') {
 }
 function deal(seed) {
   history=[];state=game==='klondike'?engine.newGame(seed,Number($('draw').value)):engine.newGame(seed);selected=null;
-  $('deal-number').value=String(state.seed);persist();render();
+  $('deal-number').value=String(state.seed);recent=[];remember();persist();render();
 }
 $('new').onclick=()=>{
   if(!confirm('Start a new deal?'))return;
   deal(game==='klondike'?Date.now():undefined);
 };
 // Draw mode is a preference, not a move; retain it when undoing earlier moves.
-$('draw').onchange=()=>{state={...state,draw:Number($('draw').value)};selected=null;persist();render();};
+$('draw').onchange=()=>{state={...state,draw:Number($('draw').value)};selected=null;recent=[];remember();persist();render();};
 $('restart').onclick=()=>{if(confirm('Restart this deal?'))deal(state.seed);};
 $('deal-form').onsubmit=e=>{e.preventDefault();if($('deal-number').reportValidity()&&confirm('Play this numbered deal?'))deal(Number($('deal-number').value));};
 $('undo').onclick=()=>{
-  if(history.length){state=game==='klondike'?{...history.pop(),draw:state.draw}:history.pop();selected=null;persist();render();}
+  if(history.length){state=game==='klondike'?{...history.pop(),draw:state.draw}:history.pop();selected=null;const i=recent.lastIndexOf(positionKey(state));recent=i<0?[]:recent.slice(0,i+1);remember();persist();render();}
 };
 $('spider-layout').onchange=()=>{
   document.querySelector('main').dataset.layout=$('spider-layout').value;
   try{localStorage.setItem('classic-win-spider-layout-v1',$('spider-layout').value);}catch{}
 };
 $('hint').onclick=()=>{
-  if(game==='spider') {
-    const hint=spider.hint(state);
-    if(hint?.type==='move') {selected={...hint.from,start:hint.start};render(`Try moving ${label(state.tableau[hint.from.index][hint.start])} to column ${hint.to.index+1}.`);}
-    else render(hint?.type==='deal'?'Try dealing a new row from stock.':'No useful move found. Try Undo or restart this deal.');
-    return;
-  }
-  if(game==='freecell') {
-    const hint=freecell.hint(state);
-    if(hint){selected={...hint.from,start:hint.start};render(`Try moving ${label(pileCards(state,hint.from.kind,hint.from.index)[hint.start])} to ${hint.to.kind==='tableau'?'column':hint.to.kind==='cells'?'cell':'home'} ${hint.to.index+1}.`);}
-    else render('No useful move found. Try Undo or restart this deal.');
-    return;
-  }
-  for(const kind of ['waste','tableau']) {
-    const piles=kind==='waste'?[state.waste]:state.tableau;
-    for(let i=0;i<piles.length;i++)for(let j=0;j<piles[i].length;j++) {
-      if(!piles[i][j].up)continue;
-      for(let f=0;f<4;f++)if(klondike.move(state,{kind,index:i},{kind:'foundations',index:f},j)) {
-        $('status').textContent='Try moving '+label(piles[i][j])+piles[i][j].suit+' to a foundation';return;
-      }
-    }
-  }
-  $('status').textContent='Try moving cards between columns or drawing from stock';
+  selected=null;
+  const hint=engine.hint(state,recent);
+  if(hint?.type==='move') {
+    selected={...hint.from,start:hint.start};
+    const card=pileCards(state,hint.from.kind,hint.from.index)[hint.start];
+    const destination=hint.to.kind==='tableau'?'column':hint.to.kind==='cells'?'cell':'foundation';
+    render(`Try moving ${label(card)}${card.suit} to ${destination} ${hint.to.index+1}. ${hint.reason}`);
+  } else if(hint?.type==='deal')render('Try dealing a new row from stock. '+hint.reason);
+  else if(hint?.type==='draw')render(hint.reason);
+  else render('No improving hint found within three moves. You can try another move, Undo, or restart.');
 };
 if('serviceWorker' in navigator) {
   // A worker update is activated only after its complete shell has cached.

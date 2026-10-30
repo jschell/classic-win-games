@@ -1,4 +1,5 @@
 import {deck,shuffle} from './cards.js';
+import {chooseHint} from './hints.js';
 
 export const MAX_SEED=2147483647;
 export function newGame(seed=(Date.now()%MAX_SEED)||1) {
@@ -39,19 +40,8 @@ export function move(s,from,to,start) {
   next.moves++;return next;
 }
 export const won=s=>s.foundations.every(p=>p.length===13);
-export function hint(s) {
-  for(const toKind of ['foundations','tableau','cells']) {
-    for(const fromKind of ['cells','tableau'])for(let i=0;i<s[fromKind].length;i++) {
-      const src=s[fromKind][i];
-      for(let start=src.length-1;start>=0;start--)for(let j=0;j<s[toKind].length;j++) {
-        if(toKind==='cells'&&fromKind==='cells')continue;
-        if(toKind==='tableau'&&!s.tableau[j].length&&fromKind==='tableau'&&start===0)continue;
-        const from={kind:fromKind,index:i},to={kind:toKind,index:j};
-        if(move(s,from,to,start))return {from,to,start};
-      }
-    }
-  }
-  return null;
+export function hint(s,recent=[]) {
+  return chooseHint(s,move,recent);
 }
 export function validate(s) {
   if(!s||s.game!=='freecell'||s.version!==1||!Number.isInteger(s.seed)||s.seed<1||s.seed>MAX_SEED||!Number.isInteger(s.moves)||s.moves<0)return false;
