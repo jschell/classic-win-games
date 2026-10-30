@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const source=await readFile(new URL('../sw.js',import.meta.url),'utf8');
 function worker({failInstall=false}={}) {
   const listeners={},store=new Map(),deleted=[];let skipped=false,claimed=false,network=0,offline=false;
-  const cache={async addAll(requests){if(failInstall)throw Error('offline');for(const req of requests){assert.equal(req.cache,'reload');store.set(req.url,new Response(req.url));}},async match(req){return store.get(req.url)?.clone();}};
+  const cache={async addAll(requests){if(failInstall)throw Error('offline');for(const req of requests){assert.equal(req.cache,'reload');store.set(req.url,new Response(req.url));}},async match(req){return store.get(typeof req==='string'?req:req.url)?.clone();}};
   const caches={async open(){return cache;},async keys(){return ['other-app-cache','classic-win-games-v3'];},async delete(key){deleted.push(key);}};
   const self={registration:{scope:'https://example.com/classic-win-games/'},addEventListener:(k,f)=>listeners[k]=f,async skipWaiting(){skipped=true;},clients:{async claim(){claimed=true;}}};
   vm.runInNewContext(source,{self,caches,URL,Request,fetch:async()=>{network++;if(offline)throw Error('offline');return new Response('network');}});
@@ -24,6 +24,6 @@ test('failed precache never skips waiting',async()=>{
 });
 test('versioned shell is served offline without networking; unowned resources untouched',async()=>{
   const w=worker();await lifecycle(w,'install');w.offline();
-  for(const path of ['/classic-win-games/','/classic-win-games/index.html','/classic-win-games/src/app.js','/classic-win-games/style.css','/classic-win-games/src/freecell.js','/classic-win-games/src/board.js'])assert.ok((await request(w,path)).ok);
+  for(const path of ['/classic-win-games/','/classic-win-games/index.html','/classic-win-games/src/app.js','/classic-win-games/style.css','/classic-win-games/src/freecell.js','/classic-win-games/src/board.js','/classic-win-games/#freecell','/classic-win-games/index.html#klondike'])assert.ok((await request(w,path)).ok);
   assert.equal(w.network,0);assert.equal(await request(w,'/other-app/'),undefined);
 });

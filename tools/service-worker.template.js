@@ -14,11 +14,15 @@ self.addEventListener('activate',event=>event.waitUntil((async()=>{
   await self.clients.claim();
 })()));
 self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET'||!shell.has(event.request.url))return;
+  const url=new URL(event.request.url);
+  // Fragments select a game, not a different cached document. FetchEvent
+  // requests can retain them even though HTTP never sends them to the server.
+  url.hash='';
+  if(event.request.method!=='GET'||!shell.has(url.href))return;
   // Each running version uses one complete shell, online and offline. An updated
   // worker stages the next shell; controllerchange reloads persisted games.
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE);
-    return await cache.match(event.request)||fetch(event.request);
+    return await cache.match(url.href)||fetch(event.request);
   })());
 });

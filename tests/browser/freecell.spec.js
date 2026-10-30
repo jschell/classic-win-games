@@ -93,6 +93,7 @@ test('FreeCell cached shell works offline with saved state and switches games',a
   const deployment=await deploymentServer();
   try {
     await page.goto(deployment.url+'#freecell');await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();
+    await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);
     await pile(page,'Column 1').locator('.card').last().tap();await tap(page,'Empty cell 1');const s=await saved(page);
     deployment.disconnected=true;await page.reload();await expect(page.locator('.stack')).toHaveCount(8);expect(await saved(page)).toEqual(s);
     await page.getByRole('link',{name:'Klondike',exact:true}).tap();await expect(page.locator('.stack')).toHaveCount(7);
