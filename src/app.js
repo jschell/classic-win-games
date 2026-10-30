@@ -1,14 +1,16 @@
 import * as klondike from './klondike.js';
 import * as freecell from './freecell.js';
+import * as spider from './spider.js';
 import {renderBoard,pileCards} from './board.js';
 import {label} from './cards.js';
 
 const $=id=>document.getElementById(id);
-const games={klondike,freecell};
+const games={klondike,freecell,spider};
+const names={klondike:'Klondike',freecell:'FreeCell',spider:'Spider'};
 let game,engine,key;
 let state, history=[], selected=null;
 function loadGame() {
-  game=location.hash==='#freecell'?'freecell':'klondike';engine=games[game];
+  game=Object.hasOwn(games,location.hash.slice(1))?location.hash.slice(1):'klondike';engine=games[game];
   key=`classic-win-${game}-v1`;history=[];selected=null;
   try {const saved=JSON.parse(localStorage.getItem(key));state=engine.validate(saved)?saved:engine.newGame();}
   catch {state=engine.newGame();}
@@ -16,10 +18,15 @@ function loadGame() {
   for(const link of document.querySelectorAll('nav a')) {
     if(link.hash===`#${game}`)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   }
-  $('draw-control').hidden=game==='freecell';$('deal-form').hidden=game!=='freecell';
+  $('draw-control').hidden=game!=='klondike';$('deal-form').hidden=game==='klondike';
+  $('spider-controls').hidden=game!=='spider';
+  let layout='fit';try{layout=localStorage.getItem('classic-win-spider-layout-v1')==='large'?'large':'fit';}catch{}
+  $('spider-layout').value=layout;document.querySelector('main').dataset.layout=layout;
   $('deal-number').value=String(state.seed);
-  $('board').setAttribute('aria-label',game==='freecell'?'FreeCell game board':'Klondike game board');
-  $('help').textContent=game==='freecell'
+  $('board').setAttribute('aria-label',`${names[game]} game board`);
+  $('help').textContent=game==='spider'
+    ?'Spider · One suit. Build down by rank; move an exposed descending sequence together. Any card or sequence can fill an empty column. Complete King-to-Ace runs are removed automatically. Fill every column before dealing a row. Tap again to cancel selection. Larger cards scroll sideways; long columns scroll down.'
+    :game==='freecell'
     ?'Build columns down in alternating colors. Any card can fill an empty column. Each cell holds one card. Build homes from Ace to King by suit. Tap an exposed card or sequence, then its destination; tap again to cancel. Sequence moves require enough empty cells and columns.'
     :'Column labels show covered-card counts (↓). Tap or click a face-up card, then its destination. Tap the selected card again to cancel. Tap stock to draw; only the top waste card is playable. Select a card and tap a foundation to move it.';
   render();
@@ -34,23 +41,29 @@ function commit(next) {
   history.push(state);state=next;selected=null;persist();render();
 }
 function clickPile(kind,index,start) {
-  if(kind==='stock'){commit(klondike.drawStock(state));return;}
+  if(kind==='stock'){
+    if(game==='spider') {
+      const next=spider.dealRow(state);
+      if(next)commit(next);else render(state.stock.length?'Fill every empty column before dealing a row.':'No stock rows remain.');
+    } else commit(klondike.drawStock(state));
+    return;
+  }
   if(selected?.kind===kind&&selected.index===index&&selected.start===start) {
     selected=null;render();return;
   }
   if(selected) {
     const next=engine.move(state,{kind:selected.kind,index:selected.index},{kind,index},selected.start);
     if(next){commit(next);return;}
-    if(game==='freecell'){render('Move unavailable. Check descending colors, empty cells and sequence capacity.');return;}
+    if(game!=='klondike'){render(game==='spider'?'Move unavailable. Use a descending same-suit sequence and place it on the next higher rank or an empty column.':'Move unavailable. Check descending colors, empty cells and sequence capacity.');return;}
   }
   const src=pileCards(state,kind,index);
-  if(game==='freecell'&&(kind==='foundations'||kind==='tableau'&&!freecell.isSequence(src.slice(start)))) {selected=null;render('Select an exposed card or a descending sequence of alternating colors.');return;}
+  if(game!=='klondike'&&(kind==='foundations'||kind==='tableau'&&!engine.isSequence(src.slice(start)))) {selected=null;render(game==='spider'?'Select an exposed card or descending same-suit sequence.':'Select an exposed card or a descending sequence of alternating colors.');return;}
   selected=src?.[start]?.up?{kind,index,start}:null;
   render();
 }
 function render(message='') {
   renderBoard({state,selected,onPile:clickPile,game,top:$('top'),tableau:$('tableau')});
-  $('status').textContent=engine.won(state)?'You won!':`Moves: ${state.moves} · Deal: ${state.seed}`;
+  $('status').textContent=engine.won(state)?'You won!':`Moves: ${state.moves} · Deal: ${state.seed}`+(game==='spider'?` · Runs: ${state.completed.filter(p=>p.length).length}/8`:'');
   const chosen=selected?pileCards(state,selected.kind,selected.index)[selected.start]:null;
   const capacity=game==='freecell'?` Empty cells: ${state.cells.filter(p=>!p.length).length}.` : '';
   $('selection').textContent=message||(chosen?'Selected '+label(chosen)+chosen.suit+' — tap a destination or tap again to cancel.'+capacity:'');
@@ -58,12 +71,12 @@ function render(message='') {
   $('undo').disabled=!history.length;
 }
 function deal(seed) {
-  history=[];state=engine.newGame(seed,Number($('draw').value));selected=null;
+  history=[];state=game==='klondike'?engine.newGame(seed,Number($('draw').value)):engine.newGame(seed);selected=null;
   $('deal-number').value=String(state.seed);persist();render();
 }
 $('new').onclick=()=>{
   if(!confirm('Start a new deal?'))return;
-  deal(game==='freecell'?undefined:Date.now());
+  deal(game==='klondike'?Date.now():undefined);
 };
 // Draw mode is a preference, not a move; retain it when undoing earlier moves.
 $('draw').onchange=()=>{state={...state,draw:Number($('draw').value)};selected=null;persist();render();};
@@ -72,7 +85,17 @@ $('deal-form').onsubmit=e=>{e.preventDefault();if($('deal-number').reportValidit
 $('undo').onclick=()=>{
   if(history.length){state=game==='klondike'?{...history.pop(),draw:state.draw}:history.pop();selected=null;persist();render();}
 };
+$('spider-layout').onchange=()=>{
+  document.querySelector('main').dataset.layout=$('spider-layout').value;
+  try{localStorage.setItem('classic-win-spider-layout-v1',$('spider-layout').value);}catch{}
+};
 $('hint').onclick=()=>{
+  if(game==='spider') {
+    const hint=spider.hint(state);
+    if(hint?.type==='move') {selected={...hint.from,start:hint.start};render(`Try moving ${label(state.tableau[hint.from.index][hint.start])} to column ${hint.to.index+1}.`);}
+    else render(hint?.type==='deal'?'Try dealing a new row from stock.':'No useful move found. Try Undo or restart this deal.');
+    return;
+  }
   if(game==='freecell') {
     const hint=freecell.hint(state);
     if(hint){selected={...hint.from,start:hint.start};render(`Try moving ${label(pileCards(state,hint.from.kind,hint.from.index)[hint.start])} to ${hint.to.kind==='tableau'?'column':hint.to.kind==='cells'?'cell':'home'} ${hint.to.index+1}.`);}

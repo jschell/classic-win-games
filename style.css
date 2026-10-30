@@ -64,3 +64,19 @@ nav a[aria-current="page"] {font-weight:700;border-color:#ffd451}
   [data-game="freecell"] .piles {gap:2px}
   [data-game="freecell"] .pile-caption {font-size:9px}
 }
+
+/* Ten-column overview; the larger view scrolls inside the board, never the page. */
+[data-game="spider"] .piles {grid-template-columns:repeat(10,minmax(0,1fr))}
+[data-game="spider"] #top [data-kind="stock"] {grid-column:span 2}
+[data-game="spider"] #top .card,[data-game="spider"] #top .empty {height:64px;aspect-ratio:auto}
+.run-marker {display:flex;align-items:center;justify-content:center;height:64px;border:1px dashed #83a79a;border-radius:5px;color:#aac7bc;background:#0b4436}
+.run-marker.complete {background:#eff7f0;color:#16372c;border-style:solid}
+[data-game="spider"] #tableau-scroll {overflow-x:auto;overscroll-behavior-x:contain}
+[data-game="spider"][data-layout="large"] #tableau {min-width:556px;gap:4px}
+[data-game="spider"] .card-corner {left:3px;font-size:clamp(12px,3.4vw,22px)}
+[data-game="spider"][data-layout="large"] .card-corner {font-size:clamp(16px,3.4vw,22px)}
+@media(max-width:600px) {
+  [data-game="spider"] #board {padding:4px}
+  [data-game="spider"] .piles {gap:2px}
+  [data-game="spider"] .pile-caption {font-size:8px}
+}
