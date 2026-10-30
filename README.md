@@ -8,7 +8,7 @@ Built with vanilla JavaScript, HTML, and CSS. No backend or runtime CDN.
 
 1. Klondike (Draw 1 and Draw 3) — implemented
 2. FreeCell — implemented
-3. Spider Solitaire — planned
+3. Spider Solitaire (one suit) — implemented
 4. Hearts with local computer opponents — planned
 
 The games use original browser-rendered cards rather than Microsoft artwork.
@@ -33,5 +33,10 @@ See [the engineering report](docs/mobile-verification.md) for findings and limit
   Numbers use our own shuffle and do not match Windows deals. See [rules and
   verification](docs/freecell.md).
 
-Both games work offline after the app shell has cached. Spider and Hearts are
-still planned.
+- **Spider:** one suit, ten columns, five stock rows, automatic run removal,
+  numbered replay, Restart, Undo and independent saves. Open `/#spider`.
+  Choose Fit columns or Larger cards (horizontal scrolling). See [rules and
+  verification](docs/spider.md).
+
+All three games work offline after the app shell has cached. Hearts remains
+planned; two/four-suit Spider modes are not exposed yet.
