@@ -58,7 +58,36 @@ state isolation, both card views, horizontal selection and offline reconnection.
 Initial and long columns are exercised at 375×667, 390×844, 430×932, 768×1024 and
 1440×900. Existing Klondike, FreeCell and worker-update tests remain in the suite.
 
-Browser results and screenshot review will be recorded after CI. Native iPhone
+[CI run 41066400605](https://github.com/jschell/classic-win-games/actions/runs/41066400605)
+passed all **30 unit/worker tests and 62 browser tests** without retries at source
+`61a5f0e0dfa2276f1d6d1fbfd13e6e31f34697c6` (55.4 seconds for browsers). This retains
+all 40 existing browser regression cases and adds 22 Spider cases.
+
+| Viewport | Chromium fit/large, initial/long | WebKit fit/large, initial/long |
+|---|---|---|
+| 375×667 | Passed | Passed |
+| 390×844 | Passed | Passed |
+| 430×932 | Passed | Passed |
+| 768×1024 | Passed | Passed |
+| 1440×900 | Passed | Passed |
+
+Reviewed the real 375px WebKit initial and long-column images, plus desktop
+Chromium. All ten columns and identifying ranks/suits fit in overview; the bottom
+cards remain inside the growing board. Tests also verify that larger-view cards
+exceed 44px width, only the inner region scrolls sideways, and a selected sequence
+survives scrolling to an invalid destination and then making a legal move.
+
+Permanent evidence: [375px overview](evidence/spider-webkit-375.png),
+[375px long columns](evidence/spider-webkit-375-long.png), and
+[1440px desktop](evidence/spider-chromium-1440.png). CI also captures Larger cards.
+
+![Spider overview at 375px in WebKit](evidence/spider-webkit-375.png)
+
+Known interaction tradeoffs are narrower overview targets, horizontal panning in
+the larger view, page scrolling for very long stacks, local rather than solving
+hints, and session-only Undo. These are explicit rather than changed game rules.
+
+Native iPhone
 Safari, standalone installation and real touch scrolling remain device checks;
 Linux WebKit results do not establish physical-device behavior. Two/four-suit UI,
 a solver, a timer and additional scoring are outside this version.

@@ -34,6 +34,9 @@ for(const [width,height] of [[375,667],[390,844],[430,932],[768,1024],[1440,900]
     let g=await geometry(page);expect(g.width).toBe(width);expect(g.pageOverflow).toBe(false);expect(g.boardOverflow).toBe(false);expect(g.contained).toBe(true);
     expect(g.cards.every(c=>c.width>=32&&c.exposed>=44&&c.readable)).toBe(true);
     await page.screenshot({path:info.outputPath(`spider-initial-${width}.png`),fullPage:true});
+    await page.getByRole('combobox',{name:'Cards',exact:true}).selectOption('large');
+    await page.screenshot({path:info.outputPath(`spider-large-${width}.png`),fullPage:true});
+    await page.getByRole('combobox',{name:'Cards',exact:true}).selectOption('fit');
     await page.evaluate(({key,state})=>localStorage.setItem(key,JSON.stringify(state)),{key,state:spiderLong()});
     const other=await page.context().newPage();await other.setViewportSize({width,height});await other.goto('/#spider');
     g=await geometry(other);expect(g.pageOverflow).toBe(false);expect(g.contained).toBe(true);expect(g.cards.every(c=>c.readable&&c.exposed>=44)).toBe(true);
