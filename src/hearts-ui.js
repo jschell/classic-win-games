@@ -25,7 +25,7 @@ export function createHeartsView({root,onCommit,onMessage}) {
     else if(s.phase==='play')summary.textContent=`Your turn · ${s.trick.length?'Follow '+s.trick[0].card.suit+' if possible.':'Lead a card.'} ${s.broken?'Hearts are broken.':'Hearts are not broken.'}`;
     else if(s.phase==='trick')summary.textContent=`${hearts.NAMES[hearts.trickWinner(s.trick)]} won this trick · ${s.trick.reduce((n,e)=>n+hearts.penalty(e.card),0)} penalty points. Review, then collect.`;
     else if(s.phase==='handOver')summary.textContent='Hand complete. Review the scores, then continue.';
-    else summary.textContent=`Match complete. ${hearts.winners(s).map(i=>hearts.NAMES[i]).join(' and ')} ${hearts.winners(s).length>1?'tie for lowest score.':'wins with the lowest score.'}`;
+    else summary.textContent=`Match complete. ${hearts.winners(s).length>1?'Joint winners':'Winner'}: ${hearts.winners(s).map(i=>hearts.NAMES[i]).join(' and ')}. Lowest score wins.`;
     root.append(summary);
     const table=element('table',undefined,'hearts-scores');table.setAttribute('aria-label','Hearts scores');
     const head=element('tr');for(const name of ['Player','Cards','Hand','Total']){const th=element('th',name);th.scope='col';head.append(th);}const thead=element('thead');thead.append(head);table.append(thead);

@@ -100,8 +100,15 @@ Initial CI passed all 62 unit and 130 browser tests at `829276f9245a7b5f59ff26b8
 Screenshot review then exposed a sticky action bar covering a row of passing
 cards at 375px. Controls now stay below the hand. Geometry checks include
 actual corner hit testing (`elementFromPoint`) to detect overlays, rather
-than checking only card bounds. Corrected screenshots and CI are recorded
-in the PR before merging.
+than checking only card bounds. Corrected source `9c820a73e42ce5fa66a1a6aeb57b785530dac56e` passed **62 unit
+and 130 browser tests** without retries in [CI 41084036150](https://github.com/jschell/classic-win-games/actions/runs/41084036150).
+
+Reviewed permanent evidence: [375px passing](evidence/hearts-pass-375.png),
+[375px completed trick](evidence/hearts-trick-375.png), and
+[1440px completed trick](evidence/hearts-trick-1440.png). All initial hand
+ranks remain unobstructed; completed tricks and disabled hand cards remain
+readable. Thirty seeded complete matches cover 330 hands and 22,010 legal
+transitions. Final CI and deployed-game checks are recorded in the PR.
 
 Physical iPhone Safari, standalone installation and native touch scrolling
 remain device checks. The browser suite uses real Linux WebKit, which does
