@@ -21,7 +21,10 @@ async function geometry(page) {
     const r=e=>e.getBoundingClientRect();return {
       overflow:document.documentElement.scrollWidth>innerWidth,
       cards:[...document.querySelectorAll('#hearts-hand .card')].map(c=>{
-        const b=r(c),m=r(c.querySelector('.card-corner'));return {width:b.width,height:b.height,readable:m.right<=b.right&&m.bottom<=b.bottom};
+        const b=r(c),m=r(c.querySelector('.card-corner')),x=m.left+m.width/2,y=m.top+m.height/2;
+        const visible=x>=0&&x<innerWidth&&y>=0&&y<innerHeight;
+        return {width:b.width,height:b.height,readable:m.right<=b.right&&m.bottom<=b.bottom,
+          unobstructed:!visible||document.elementFromPoint(x,y)?.closest('.card')===c};
       })
     };
   });
@@ -29,12 +32,12 @@ async function geometry(page) {
 for(const [width,height] of [[375,667],[390,844],[430,932],[768,1024],[1440,900]])test(`Hearts passing and progressed layout ${width}x${height}`,async({page},info)=>{
   await page.setViewportSize({width,height});await load(page);
   await expect(hand(page).locator('.card')).toHaveCount(13);await expect(page.getByRole('table',{name:'Hearts scores',exact:true})).toBeVisible();
-  let g=await geometry(page);expect(g.overflow).toBe(false);expect(g.cards.every(c=>c.width>=44&&c.height>=44&&c.readable)).toBe(true);
+  let g=await geometry(page);expect(g.overflow).toBe(false);expect(g.cards.every(c=>c.width>=44&&c.height>=44&&c.readable&&c.unobstructed)).toBe(true);
   await expect(page.locator('#hearts-action')).toBeDisabled();await page.screenshot({path:info.outputPath(`hearts-pass-${width}.png`),fullPage:true});
   await action(page);
   while((await saved(page)).phase!=='trick')await action(page);
   await expect(page.locator('.hearts-trick .card')).toHaveCount(4);
-  g=await geometry(page);expect(g.overflow).toBe(false);expect(g.cards.every(c=>c.readable&&c.width>=44)).toBe(true);
+  g=await geometry(page);expect(g.overflow).toBe(false);expect(g.cards.every(c=>c.readable&&c.width>=44&&c.unobstructed)).toBe(true);
   await page.screenshot({path:info.outputPath(`hearts-trick-${width}.png`),fullPage:true});
   await page.evaluate(({key,state})=>localStorage.setItem(key,JSON.stringify(state)),{key,state:lastTrick()});await page.reload();
   await expect(hand(page).locator('.card')).toHaveCount(1);g=await geometry(page);expect(g.overflow).toBe(false);

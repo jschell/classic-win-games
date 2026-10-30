@@ -94,7 +94,7 @@ nav a[aria-current="page"] {font-weight:700;border-color:#ffd451}
 .hearts-hand .card {min-height:44px;max-height:140px}
 .hearts-hand .card:disabled {background:#d6e0d9;box-shadow:none;cursor:default}
 .hearts-hand .card:not(:disabled) {border:2px solid #fff}
-.hearts-actions {position:sticky;bottom:0;margin:12px -4px 0;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));background:#0b2c25;border-radius:8px;z-index:2}
+.hearts-actions {margin:12px 0 0;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));background:#0b2c25;border-radius:8px}
 #hearts-board h2 {font-size:1rem;margin:12px 0 8px}
 #hearts-board details {margin-top:10px}
 @media(max-width:600px) {

@@ -49,8 +49,8 @@ at any time after the first hand. **Next hand** continues the same match.
 The hand wraps without overlap, with targets at least 44px in each dimension.
 Stock/tableau controls are hidden. Cards reuse `src/board.js` and shared CSS.
 The four-card trick fits the phone width; the hand and controls scroll with
-the page. The action bar stays near the viewport bottom when scrolling, with
-safe-area padding. Opponent cards are not rendered, including in attributes.
+the page. The action bar follows the hand in normal flow, with safe-area
+padding, so it cannot overlay card ranks. Opponent cards are not rendered, including in attributes.
 Only their names, remaining counts, scores and public plays are shown.
 
 ## State and computer players
@@ -96,7 +96,12 @@ Browser coverage includes all five viewport sizes in Chromium and WebKit,
 passing/deselection, hints without mutation, legal-card disabling, a complete
 13-trick hand, moon/match-end screens and Undo, replay/Restart/New, saved games,
 other-game isolation, invalid saves, blocked storage and offline progression.
-CI results and screenshot evidence will be recorded in the PR after execution.
+Initial CI passed all 62 unit and 130 browser tests at `829276f9245a7b5f59ff26b88771b7c14fcc7411`.
+Screenshot review then exposed a sticky action bar covering a row of passing
+cards at 375px. Controls now stay below the hand. Geometry checks include
+actual corner hit testing (`elementFromPoint`) to detect overlays, rather
+than checking only card bounds. Corrected screenshots and CI are recorded
+in the PR before merging.
 
 Physical iPhone Safari, standalone installation and native touch scrolling
 remain device checks. The browser suite uses real Linux WebKit, which does
