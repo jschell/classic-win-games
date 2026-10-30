@@ -80,3 +80,26 @@ nav a[aria-current="page"] {font-weight:700;border-color:#ffd451}
   [data-game="spider"] .piles {gap:2px}
   [data-game="spider"] .pile-caption {font-size:8px}
 }
+/* Hearts uses the shared card faces with a fully exposed, wrapping hand. */
+#hearts-board {background:linear-gradient(140deg,#17614a,#12513e);padding:12px;border-radius:14px}
+.hearts-summary {margin:0 0 8px;font-weight:600}
+.hearts-scores {width:100%;border-collapse:collapse;margin-bottom:12px;font-variant-numeric:tabular-nums}
+.hearts-scores th,.hearts-scores td {padding:5px 8px;text-align:right;border-bottom:1px solid #83a79a}
+.hearts-scores th:first-child {text-align:left}
+.hearts-trick {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}
+.hearts-trick .card,.hearts-trick-empty {max-width:76px;margin:auto;opacity:1;cursor:default}
+.hearts-trick-empty {aspect-ratio:2.5/3.5;display:grid;place-items:center;border:1px dashed #83a79a;border-radius:6px;color:#aac7bc}
+.hearts-trick .pile-caption {text-align:center}
+.hearts-hand {display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:8px}
+.hearts-hand .card {min-height:44px;max-height:140px}
+.hearts-hand .card:disabled {background:#d6e0d9;box-shadow:none;cursor:default}
+.hearts-hand .card:not(:disabled) {border:2px solid #fff}
+.hearts-actions {margin:12px 0 0;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));background:#0b2c25;border-radius:8px}
+#hearts-board h2 {font-size:1rem;margin:12px 0 8px}
+#hearts-board details {margin-top:10px}
+@media(max-width:600px) {
+  #hearts-board {padding:8px}
+  .hearts-hand {grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}
+  .hearts-trick {gap:6px}
+  .hearts-scores {font-size:.85rem}
+}

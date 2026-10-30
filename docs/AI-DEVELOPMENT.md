@@ -6,6 +6,17 @@ For each game: (1) research and specify traditional rules; (2) implement a compl
 
 Do not change traditional rules to make a game seem more fun. Use HTML/CSS and vanilla JavaScript for 2D cards; Three.js is not required. Avoid Microsoft-owned art assets.
 
-## Remaining acceptance work
+## Implemented games and remaining acceptance work
 
-Klondike: comprehensive legal move tests, move history persistence, hint coverage, stock recycle rule variants, auto-foundation, win-state browser tests, mobile Safari manual testing, and PWA icons. FreeCell is implemented; see [its rules and verification](freecell.md). Spider one/two/four-suit modes are implemented; see [its rules and verification](spider.md). Native iPhone testing remains for all three games. Hearts follows.
+All four games have playable, tested loops: [Klondike](mobile-verification.md),
+[FreeCell](freecell.md), [Spider in one/two/four suits](spider.md), and
+[Hearts against three computer players](hearts.md). Hint evaluation is described
+[in its report](hints.md). The shared PWA includes icons, offline asset caching,
+update/reload handling and automated Chromium/WebKit checks.
+
+Remaining work is physical iPhone Safari and standalone-install verification,
+native panning, keyboard/assistive-technology review, stronger Hearts strategy,
+and ongoing regression maintenance. Undo is session-only; saved boards and
+scores survive refresh. Optional enhancements include persisted Undo and
+Klondike auto-foundation/stock-rule variants. These are follow-up work, not
+additional games or changes to the documented traditional rules.
