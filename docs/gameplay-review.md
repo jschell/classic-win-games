@@ -16,15 +16,21 @@ which also includes Hearts and updated four-game/Spider-mode documentation.
 No native wrapper is included. A Tauri wrapper still needs its own packaging,
 service-worker gating, storage/export decisions and Windows verification.
 
-## Validation
+## Local validation before opening the PR
 
 - All 69 Node tests passed locally, including bounded/persisted Undo, corrupt
   history rejection, board-save fallback and foundation-only finishing.
 - Source formatting, generated worker hash and whitespace checks passed.
 - Playwright discovers 150 Chromium/WebKit tests, including desktop shortcuts,
   empty-column taps, Finish/Undo, Draw confirmation and persisted Undo checks.
-  Browser validation is **pending**: Chromium downloads returned invalid archives.
+  Browser validation was pending locally: Chromium downloads returned invalid archives.
   WebKit downloaded, but launch was blocked by missing system libraries and its
   GTK dependency download was truncated. No browser assertion ran successfully.
-  Run the existing two-engine CI suite before merge; desktop drag/drop and
-  double-click remain unverified until then.
+  The two-engine CI results and final merge evidence are recorded in
+  [PR #11](https://github.com/jschell/classic-win-games/pull/11).
+
+CI subsequently exercised the browser suite and caught Chromium synthesizing
+double-click events after rapid touch taps. The foundation shortcut now requires
+a mouse pointer, retaining touch select/cancel behavior. Explicit touch
+regressions bring the suite to 154 Chromium/WebKit cases; the PR records the
+final run for this fix.
