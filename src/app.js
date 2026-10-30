@@ -33,7 +33,8 @@ function pile(kind,index,container) {
   slot.dataset.kind=kind;slot.dataset.index=String(index??0);
   const name=kind==='tableau'?`Column ${index+1}`:kind==='foundations'?`Foundation ${index+1}`:kind==='stock'?'Stock':'Waste';
   const caption=document.createElement('span');caption.className='pile-caption';
-  caption.textContent=kind==='foundations'?`Home ${index+1}`:kind==='tableau'?`${index+1} · ${cards.filter(c=>!c.up).length} covered`:`${name} · ${cards.length}`;
+  caption.textContent=kind==='foundations'?`Home ${index+1}`:kind==='tableau'?`${index+1} · ${cards.filter(c=>!c.up).length}↓`:`${name} · ${cards.length}`;
+  if(kind==='tableau')caption.setAttribute('aria-label',`${name}: ${cards.filter(c=>!c.up).length} covered cards`);
   slot.append(caption);
   const box=document.createElement('div');box.className='pile'+(kind==='tableau'?' stack':'');
   box.setAttribute('role','group');box.setAttribute('aria-label',name);
