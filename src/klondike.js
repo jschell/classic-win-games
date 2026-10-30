@@ -9,4 +9,23 @@ if(!canPlace(group[0],dst,to.kind==='foundations'?'foundation':'tableau'))return
 src.splice(start);dst.push(...group);if(from.kind==='tableau'&&src.length)src.at(-1).up=true;n.moves++;return n}
 export function drawStock(s){const n=clone(s);if(n.stock.length){for(let i=0;i<n.draw&&n.stock.length;i++){const c=n.stock.pop();c.up=true;n.waste.push(c)}}else if(n.waste.length){n.stock=n.waste.reverse().map(c=>({...c,up:false}));n.waste=[];n.passes++}else return null;n.moves++;return n}
 export const won=s=>s.foundations.every(p=>p.length===13);
-export function validate(s){const cards=[...s.stock,...s.waste,...s.tableau.flat(),...s.foundations.flat()];return cards.length===52&&new Set(cards.map(c=>c.id)).size===52}
+export function validate(s) {
+  if(!s||![1,3].includes(s.draw)||!Number.isFinite(s.seed)||
+    ![s.moves,s.passes].every(n=>Number.isInteger(n)&&n>=0)||
+    !Array.isArray(s.stock)||!Array.isArray(s.waste)||
+    !Array.isArray(s.tableau)||s.tableau.length!==7||
+    !Array.isArray(s.foundations)||s.foundations.length!==4||
+    ![...s.tableau,...s.foundations].every(Array.isArray))return false;
+  const cards=[...s.stock,...s.waste,...s.tableau.flat(),...s.foundations.flat()];
+  const canonical=deck();
+  if(cards.length!==52||new Set(cards.map(c=>c?.id)).size!==52)return false;
+  if(!cards.every(c=>c&&canonical[c.id]&&typeof c.up==='boolean'&&
+    ['id','rank','suit','red'].every(k=>c[k]===canonical[c.id][k])))return false;
+  if(s.stock.some(c=>c.up)||s.waste.some(c=>!c.up))return false;
+  for(const pile of s.tableau) {
+    if(pile.length&&!pile.at(-1).up)return false;
+    for(let i=1;i<pile.length;i++)if(pile[i-1].up&&
+      (!pile[i].up||pile[i-1].rank!==pile[i].rank+1||pile[i-1].red===pile[i].red))return false;
+  }
+  return s.foundations.every(p=>p.every((c,i)=>c.up&&c.rank===i+1&&c.suit===p[0].suit));
+}
