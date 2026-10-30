@@ -45,7 +45,10 @@ remain available even if the hint evaluator declines to recommend them.
 - Browser suite includes 14 new Chromium/WebKit checks: screenshot-equivalent
   supports at 375×667, repeated Hint taps without mutation, touch-followed
   hint walks for all games, saved trail/Undo/refresh/game switching/Restart.
-  Browser execution results are recorded in the PR after CI completes.
+  All 76 browser tests passed without retries in GitHub Actions run
+  [41071546241](https://github.com/jschell/classic-win-games/actions/runs/41071546241)
+  at source commit `9baf99932d374e6a3f9c93b7ca11cc3d3ac9e8a1`.
+  [Reviewed WebKit screenshot at 375×667](evidence/hints-spider-webkit-375.png).
 - The new evaluator is included in the complete versioned offline shell.
 
 The screenshot fixture reproduces the reported equivalent supports with all
