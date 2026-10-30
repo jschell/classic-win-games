@@ -114,6 +114,8 @@ if('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
     const check=()=>reg.update().catch(()=>{});
     window.addEventListener('online',check);
+    window.addEventListener('focus',check);
+    window.setInterval(check,60*60*1000);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});
     check();
   }).catch(()=>{});
