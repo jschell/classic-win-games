@@ -1,1 +1,13 @@
-{"name":"classic-win-games","private":true,"type":"module","scripts":{"test":"node --test"}}
+{
+  "name": "classic-win-games",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tools/build-sw.mjs --check && node --test tests/*.test.js",
+    "build:sw": "node tools/build-sw.mjs",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}
