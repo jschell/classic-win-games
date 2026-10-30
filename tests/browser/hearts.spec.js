@@ -78,7 +78,7 @@ test('shooting the moon and match completion display correct scores and support 
   await page.getByRole('button',{name:'Undo',exact:true}).tap();expect(await saved(page)).toEqual(end);
 });
 test('refresh and game switching preserve play; numbered replay, Restart and New game reset only Hearts',async({page})=>{
-  await load(page);await action(page);await action(page);const progress=await saved(page);await page.reload();expect(await saved(page)).toEqual(progress);await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeDisabled();
+  await load(page);await action(page);await action(page);const progress=await saved(page);await page.reload();expect(await saved(page)).toEqual(progress);await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeEnabled();
   await page.getByRole('link',{name:'Spider',exact:true}).tap();await page.getByRole('button',{name:/^Deal row /}).tap();
   const spider=await page.evaluate(()=>localStorage.getItem('classic-win-spider-v1'));
   await page.getByRole('link',{name:'Hearts',exact:true}).tap();expect(await saved(page)).toEqual(progress);

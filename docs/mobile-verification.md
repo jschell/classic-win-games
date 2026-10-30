@@ -65,3 +65,10 @@ Selected permanent evidence:
 ![390px WebKit initial deal](evidence/webkit-390-initial.png)
 
 Native iPhone Safari, standalone installation, real GitHub Pages deployment replacement, background suspension and storage eviction require additional device verification. The two-tab replacement path is verified on isolated local test origins in both engines. WebKit on Linux is useful engine coverage, not a physical iPhone test. Draw 3 intentionally displays only the playable top waste card. Undo history remains session-only; the current game persists. Hint remains foundation-focused. No additional games implemented.
+
+## Subsequent gameplay review fixes
+
+Draw changes now require a confirmed new deal. Undo persists up to 100 actions
+per game. Desktop drag/drop, double-click-to-home and a proven foundation-only
+Finish are available; hints are explicitly local nudges. The older observations
+above describe the commits named there, rather than current feature limits.

@@ -55,7 +55,7 @@ test('Spider touch sequences, reveal, empty destination, deselection, undo and r
   await tap(page,s.tableau[3][0].id);await page.getByRole('button',{name:'Empty column 3',exact:true}).tap();
   expect((await saved(page)).tableau[2][0].rank).toBe(5);
   await page.getByRole('button',{name:'Undo',exact:true}).tap();const progress=await saved(page);expect(validate(progress)).toBe(true);
-  await page.reload();expect(await saved(page)).toEqual(progress);await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeDisabled();
+  await page.reload();expect(await saved(page)).toEqual(progress);await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeEnabled();
 });
 test('Spider large-card view preserves selection across horizontal scrolling',async({page})=>{
   const s=spiderPuzzle();await page.setViewportSize({width:375,height:667});await load(page,s);

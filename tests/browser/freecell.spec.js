@@ -56,7 +56,7 @@ test('FreeCell touch cells, sequences, any-card empty column, homes, undo and re
   await page.getByRole('button',{name:'Undo',exact:true}).tap();
   await expect(pile(page,'Foundation 1').getByRole('button',{name:'A of clubs',exact:true})).toBeVisible();
   const s=await saved(page);expect(validate(s)).toBe(true);await page.reload();expect(await saved(page)).toEqual(s);
-  await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeEnabled();
 });
 test('FreeCell rejects over-capacity sequence without mutation and allows cancel',async({page})=>{
   const s=capacityState(0,1);await load(page,s);const before=await saved(page);

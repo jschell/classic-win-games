@@ -5,9 +5,12 @@
   "scripts": {
     "test": "node tools/build-sw.mjs --check && node --test tests/*.test.js",
     "build:sw": "node tools/build-sw.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "format": "prettier --write \"src/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\""
   },
   "devDependencies": {
-    "@playwright/test": "1.62.1"
+    "@playwright/test": "1.62.1",
+    "prettier": "3.6.2"
   }
 }

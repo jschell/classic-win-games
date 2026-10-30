@@ -74,7 +74,7 @@ test('each suit mode resumes its own board and trail; legacy one-suit save, repl
     await page.getByRole('combobox',{name:'Suits',exact:true}).selectOption(String(suits));expect(await saved(page,suits)).toEqual(progress[suits]);
     await page.reload();await expect(page.getByRole('combobox',{name:'Suits',exact:true})).toHaveValue(String(suits));expect(await saved(page,suits)).toEqual(progress[suits]);
     expect(await page.evaluate(key=>JSON.parse(localStorage.getItem(`${key}-hint-trail`)).at(-1),key(suits))).toBe(positionKey(progress[suits]));
-    await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeDisabled();
+    await expect(page.getByRole('button',{name:'Undo',exact:true})).toBeEnabled();
   }
   await page.getByRole('combobox',{name:'Suits',exact:true}).selectOption('4');
   await page.getByRole('spinbutton',{name:'Deal number',exact:true}).fill('42');page.once('dialog',d=>d.accept());await page.getByRole('button',{name:'Play deal',exact:true}).tap();

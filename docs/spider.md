@@ -24,10 +24,10 @@ solvability is not guaranteed.
   cards flip face up, including after removal; newly exposed full runs also clear.
   All eight completed runs win. Completed runs are display-only.
 - Undo reverses an entire action, including a stock row, run removal and reveals.
-  History is session-only and resets when refreshing or switching games. Each
+  The last 100 actions persist across refresh and game switching. Each
   game's current board persists independently. Each Spider suit mode also has
-  its own board and hint trail. Switching modes resumes that board and clears
-  session Undo, just like switching games; it does not discard other boards.
+  its own board, Undo history and hint trail. Switching modes resumes them
+  without discarding other boards.
 - Restart and numbered replay preserve the current suit mode and seed. Hints
   evaluate reveals, completed runs, space and same-suit joins, including bounded
   setup search and recent-position loop filtering; they are not a solver. See
@@ -95,7 +95,7 @@ Permanent evidence: [375px overview](evidence/spider-webkit-375.png),
 
 Known interaction tradeoffs are narrower overview targets, horizontal panning in
 the larger view, page scrolling for very long stacks, local rather than solving
-hints, and session-only Undo. These are explicit rather than changed game rules.
+hints, and a 100-action Undo limit. These are explicit rather than changed game rules.
 
 Native iPhone
 Safari, standalone installation and real touch scrolling remain device checks;

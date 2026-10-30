@@ -16,7 +16,8 @@ update/reload handling and automated Chromium/WebKit checks.
 
 Remaining work is physical iPhone Safari and standalone-install verification,
 native panning, keyboard/assistive-technology review, stronger Hearts strategy,
-and ongoing regression maintenance. Undo is session-only; saved boards and
-scores survive refresh. Optional enhancements include persisted Undo and
-Klondike auto-foundation/stock-rule variants. These are follow-up work, not
+and ongoing regression maintenance. Undo now persists up to 100 actions with
+each saved board. Desktop drag/drop, double-click-to-foundation and a proven
+foundation-only Finish are implemented. Optional enhancements include stronger
+FreeCell solving and Klondike stock-rule variants. These are follow-up work, not
 additional games or changes to the documented traditional rules.
