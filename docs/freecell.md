@@ -47,6 +47,37 @@ touch actions, numbered replay/restart/new deal, save isolation, offline switchi
 and initial/long-column geometry/screenshots at 375×667, 390×844, 430×932,
 768×1024 and 1440×900. The existing Klondike and deployment-update checks remain.
 
-CI results and reviewed screenshot evidence will be recorded after the browser run.
+[CI run 41006354131](https://github.com/jschell/classic-win-games/actions/runs/41006354131)
+passed **20 unit tests and all 40 Chromium/WebKit browser tests** without retries
+at source commit `b95603bf38a98c00efa514134e74ff1e4e9d689e` (33.6 seconds for browsers).
+This includes all 20 existing Klondike/update cases and 20 FreeCell cases.
+
+| Viewport | Initial and long columns, Chromium | Initial and long columns, WebKit |
+|---|---|---|
+| 375×667 | Passed | Passed |
+| 390×844 | Passed | Passed |
+| 430×932 | Passed | Passed |
+| 768×1024 | Passed | Passed |
+| 1440×900 | Passed | Passed |
+
+Reviewed real rendered screenshots: eight columns fit, ranks/suits remain visible,
+exposed face-up strips and card widths meet 44px at the tested sizes, and bottom
+cards stay inside the naturally growing board. Phone layouts use normal vertical
+page scrolling to reach lower cards and controls.
+
+The first run caught an actual shared-worker defect: an offline reload at
+`#freecell` could miss the cached root document because the FetchEvent URL
+retained its fragment. The worker now removes fragments before matching both
+games' shell URLs. Unit tests cover fragment URLs; both browser engines passed
+FreeCell offline reload, game switching and reconnection with server connections
+cut. The existing two-tab failed/successful worker replacement tests also passed.
+
+Permanent screenshots:
+[375px WebKit initial](evidence/freecell-webkit-375.png),
+[375px WebKit long columns](evidence/freecell-webkit-375-long.png),
+[1440px Chromium initial](evidence/freecell-chromium-1440.png).
+
+![FreeCell at 375px in WebKit](evidence/freecell-webkit-375.png)
+
 Physical iPhone Safari and Home Screen installation remain device checks; Linux
 WebKit coverage does not establish those results.
