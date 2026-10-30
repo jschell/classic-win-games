@@ -48,3 +48,19 @@ button:focus-visible,select:focus-visible {outline:3px solid #ffd451;outline-off
   .card,.empty {border-radius:5px}
   .help {padding:6px}
 }
+/* Shared navigation and controls; each game owns only its column count. */
+[hidden] {display:none!important}
+nav a {display:inline-flex;align-items:center;min-height:44px;padding:4px 8px;color:inherit;text-decoration:none;border-bottom:2px solid transparent}
+nav a[aria-current="page"] {font-weight:700;border-color:#ffd451}
+.toolbar input {font:inherit;min-height:44px;width:9em;max-width:100%;padding:6px;border:1px solid #bed3c7;border-radius:8px}
+.toolbar button:disabled {opacity:.5;cursor:default}
+.deal-note {font-size:.8rem;opacity:.8}
+[data-game="freecell"] .piles {grid-template-columns:repeat(8,minmax(0,1fr))}
+[data-game="freecell"] #top [data-kind="foundations"][data-index="0"] {grid-column:5}
+[data-game="freecell"] #top [data-kind="cells"] .empty {border-color:#e0c574;background:#264c3c}
+@media(max-width:600px) {
+  main[data-game="freecell"] {padding:2px}
+  [data-game="freecell"] #board {padding:2px}
+  [data-game="freecell"] .piles {gap:2px}
+  [data-game="freecell"] .pile-caption {font-size:9px}
+}

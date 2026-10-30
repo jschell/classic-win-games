@@ -28,3 +28,14 @@ and `npm run test:browser`. CI runs both engines and retains the HTML report,
 viewport screenshots and failure traces in the `browser-evidence` artifact.
 Tests cover five viewport sizes, touch gameplay and offline/updated deployments.
 See [the engineering report](docs/mobile-verification.md) for findings and limits.
+
+## Games
+
+- **Klondike:** Draw 1/3, hints, Undo and saved games.
+- **FreeCell:** eight face-up columns, four cells, capacity-limited sequence moves,
+  numbered deals, Restart, hints, Undo and its own saved game. Open `/#freecell`.
+  Numbers use our own shuffle and do not match Windows deals. See [rules and
+  verification](docs/freecell.md).
+
+Both games work offline after the app shell has cached. Spider and Hearts are
+still planned.
