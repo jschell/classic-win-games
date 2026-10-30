@@ -1,16 +1,19 @@
 import * as klondike from './klondike.js';
 import * as freecell from './freecell.js';
 import * as spider from './spider.js';
+import * as hearts from './hearts.js';
+import {createHeartsView} from './hearts-ui.js';
 import {renderBoard,pileCards} from './board.js';
 import {label} from './cards.js';
 import {positionKey} from './hints.js';
 
 const $=id=>document.getElementById(id);
-const games={klondike,freecell,spider};
-const names={klondike:'Klondike',freecell:'FreeCell',spider:'Spider'};
+const games={klondike,freecell,spider,hearts};
+const names={klondike:'Klondike',freecell:'FreeCell',spider:'Spider',hearts:'Hearts'};
 let game,engine,key,spiderSuits=1;
 let state, history=[], selected=null, recent=[];
 function remember() {
+  if(game==='hearts')return;
   const fingerprint=positionKey(state);
   if(recent.at(-1)!==fingerprint)recent.push(fingerprint);
   recent=recent.slice(-128);
@@ -28,23 +31,30 @@ function loadGame(mode) {
   try {const saved=JSON.parse(localStorage.getItem(key));state=engine.validate(saved)&&(game!=='spider'||saved.suits===spiderSuits)?saved:fresh();}
   catch {state=fresh();}
   try{recent=JSON.parse(localStorage.getItem(`${key}-hint-trail`));}catch{recent=[];}
-  if(!Array.isArray(recent)||recent.some(p=>typeof p!=='string')||recent.at(-1)!==positionKey(state))recent=[];
+  if(game==='hearts')recent=[];
+  else if(!Array.isArray(recent)||recent.some(p=>typeof p!=='string')||recent.at(-1)!==positionKey(state))recent=[];
   remember();
   document.querySelector('main').dataset.game=game;
   for(const link of document.querySelectorAll('nav a')) {
     if(link.hash===`#${game}`)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   }
+  $('new').textContent=game==='hearts'?'New game':'New deal';
+  $('deal-label').textContent=game==='hearts'?'Match number':'Deal number';
+  $('board').hidden=game==='hearts';$('hearts-board').hidden=game!=='hearts';
   $('draw-control').hidden=game!=='klondike';$('deal-form').hidden=game==='klondike';
   $('spider-controls').hidden=game!=='spider';$('spider-suits').value=String(spiderSuits);
   let layout='fit';try{layout=localStorage.getItem('classic-win-spider-layout-v1')==='large'?'large':'fit';}catch{}
   $('spider-layout').value=layout;document.querySelector('main').dataset.layout=layout;
   $('deal-number').value=String(state.seed);
   $('board').setAttribute('aria-label',`${names[game]} game board`);
-  $('help').textContent=game==='spider'
+  $('help').textContent=game==='hearts'
+    ?'Hearts · Lowest score wins when someone reaches 100. Pass left, right, across, then hold. Open with 2♣ and follow suit. No penalty discard on trick one unless forced. Lead hearts only after a heart is played, or with only hearts left. Hearts score 1 each, Q♠ scores 13; taking all 26 adds 26 to everyone else. Tap a white card to select it, then Play selected card. Collect each completed trick when ready. Undo includes the following computer plays and is session-only. Opponents use their own hands and public cards.'
+    :game==='spider'
     ?`Spider · ${spiderSuits} ${spiderSuits===1?'suit':'suits'}. Build down by rank regardless of suit. Only descending same-suit sequences move together; a mixed-suit stack must be separated. Any card or movable sequence can fill an empty column. Complete same-suit King-to-Ace runs are removed automatically. Fill every column before dealing a row. Each suit mode keeps its own saved deal. Tap again to cancel selection. Larger cards scroll sideways; long columns scroll down.`
     :game==='freecell'
     ?'Build columns down in alternating colors. Any card can fill an empty column. Each cell holds one card. Build homes from Ace to King by suit. Tap an exposed card or sequence, then its destination; tap again to cancel. Sequence moves require enough empty cells and columns.'
     :'Column labels show covered-card counts (↓). Tap or click a face-up card, then its destination. Tap the selected card again to cancel. Tap stock to draw; only the top waste card is playable. Select a card and tap a foundation to move it.';
+  if(game==='hearts'){state=hearts.advanceComputers(state);persist();}
   render();
 }
 window.addEventListener('hashchange',()=>{persist();loadGame();});
@@ -54,7 +64,7 @@ function persist() {
 }
 function commit(next) {
   if(!next)return;
-  history.push(state);state=next;selected=null;remember();persist();render();
+  history.push(state);if(game==='hearts')history=history.slice(-100);state=next;selected=null;remember();persist();render();
 }
 function clickPile(kind,index,start) {
   if(kind==='stock'){
@@ -78,6 +88,10 @@ function clickPile(kind,index,start) {
   render();
 }
 function render(message='') {
+  if(game==='hearts') {
+    $('status').textContent=`Hand ${state.handNumber+1} · Trick ${Math.min(13,state.tricks.length+1)}/13 · Match ${state.seed}`;
+    $('selection').textContent=heartsView.render(state,message);$('undo').disabled=!history.length;return;
+  }
   renderBoard({state,selected,onPile:clickPile,game,top:$('top'),tableau:$('tableau')});
   $('status').textContent=engine.won(state)?'You won!':`Moves: ${state.moves} · Deal: ${state.seed}`+(game==='spider'?` · ${state.suits} ${state.suits===1?'suit':'suits'} · Runs: ${state.completed.filter(p=>p.length).length}/8`:'');
   const chosen=selected?pileCards(state,selected.kind,selected.index)[selected.start]:null;
@@ -91,15 +105,15 @@ function deal(seed) {
   $('deal-number').value=String(state.seed);recent=[];remember();persist();render();
 }
 $('new').onclick=()=>{
-  if(!confirm('Start a new deal?'))return;
+  if(!confirm(game==='hearts'?'Start a new Hearts match?':'Start a new deal?'))return;
   deal(game==='klondike'?Date.now():undefined);
 };
 // Draw mode is a preference, not a move; retain it when undoing earlier moves.
 $('draw').onchange=()=>{state={...state,draw:Number($('draw').value)};selected=null;recent=[];remember();persist();render();};
-$('restart').onclick=()=>{if(confirm('Restart this deal?'))deal(state.seed);};
-$('deal-form').onsubmit=e=>{e.preventDefault();if($('deal-number').reportValidity()&&confirm('Play this numbered deal?'))deal(Number($('deal-number').value));};
+$('restart').onclick=()=>{if(confirm(game==='hearts'?'Restart this entire match and reset scores?':'Restart this deal?'))deal(state.seed);};
+$('deal-form').onsubmit=e=>{e.preventDefault();if($('deal-number').reportValidity()&&confirm(game==='hearts'?'Start this numbered match and reset scores?':'Play this numbered deal?'))deal(Number($('deal-number').value));};
 $('undo').onclick=()=>{
-  if(history.length){state=game==='klondike'?{...history.pop(),draw:state.draw}:history.pop();selected=null;const i=recent.lastIndexOf(positionKey(state));recent=i<0?[]:recent.slice(0,i+1);remember();persist();render();}
+  if(history.length){state=game==='klondike'?{...history.pop(),draw:state.draw}:history.pop();selected=null;const i=game==='hearts'?-1:recent.lastIndexOf(positionKey(state));recent=i<0?[]:recent.slice(0,i+1);remember();persist();render();}
 };
 $('spider-suits').onchange=()=>{
   persist();
@@ -112,6 +126,7 @@ $('spider-layout').onchange=()=>{
   try{localStorage.setItem('classic-win-spider-layout-v1',$('spider-layout').value);}catch{}
 };
 $('hint').onclick=()=>{
+  if(game==='hearts'){heartsView.hint();return;}
   selected=null;
   const hint=engine.hint(state,recent);
   if(hint?.type==='move') {
@@ -140,4 +155,5 @@ if('serviceWorker' in navigator) {
     check();
   }).catch(()=>{});
 }
+const heartsView=createHeartsView({root:$('hearts-board'),onCommit:commit,onMessage:render});
 loadGame();

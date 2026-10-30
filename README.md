@@ -38,5 +38,8 @@ See [the engineering report](docs/mobile-verification.md) for findings and limit
   Choose Fit columns or Larger cards (horizontal scrolling). See [rules and
   verification](docs/spider.md).
 
-All three games work offline after the app shell has cached. Hearts remains
-planned.
+- **Hearts:** play against three computer opponents, with passing, legal-card
+  selection, visible trick review, moon scoring, matches to 100, Undo and saved
+  matches. Open `/#hearts`. See [rules and verification](docs/hearts.md).
+
+All four games work offline after the app shell has cached.

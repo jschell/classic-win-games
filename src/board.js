@@ -1,6 +1,6 @@
 import {label} from './cards.js';
 export const pileCards=(s,kind,index)=>kind==='stock'?s.stock:kind==='waste'?s.waste:s[kind][index];
-function card(c) {
+export function card(c) {
   const el=document.createElement('button');
   el.type='button';el.dataset.cardId=String(c.id);
   el.className='card '+(c.up?(c.red?'red':'black'):'back');
