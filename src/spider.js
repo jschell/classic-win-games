@@ -1,4 +1,5 @@
 import {shuffle} from './cards.js';
+import {chooseHint,unseen} from './hints.js';
 
 export const MAX_SEED=2147483647;
 // Distinct IDs identify the eight copies of each rank in one-suit Spider.
@@ -48,21 +49,8 @@ export function dealRow(s) {
   next.moves++;return settle(next);
 }
 export const won=s=>s.completed.every(p=>p.length===13);
-export function hint(s) {
-  let fallback=null;
-  for(let i=0;i<10;i++)for(let start=0;start<s.tableau[i].length;start++) {
-    if(!isSequence(s.tableau[i].slice(start)))continue;
-    for(let j=0;j<10;j++) {
-      if(i===j||!s.tableau[j].length&&start===0)continue;
-      const from={kind:'tableau',index:i},to={kind:'tableau',index:j};
-      if(move(s,from,to,start)) {
-        const result={type:'move',from,to,start};
-        if(start>0&&!s.tableau[i][start-1].up)return result;
-        if(!fallback||s.tableau[j].length&&!s.tableau[fallback.to.index].length)fallback=result;
-      }
-    }
-  }
-  return fallback||(canDeal(s)?{type:'deal'}:null);
+export function hint(s,recent=[]) {
+  return chooseHint(s,move,recent)||(canDeal(s)&&unseen(dealRow(s),recent)?{type:'deal',reason:'No improving sequence move found.'}:null);
 }
 export function validate(s) {
   if(!s||s.game!=='spider'||s.version!==1||s.suits!==1||!Number.isInteger(s.seed)||s.seed<1||s.seed>MAX_SEED||!Number.isInteger(s.moves)||s.moves<0)return false;

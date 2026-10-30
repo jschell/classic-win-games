@@ -1,4 +1,5 @@
 import {deck,shuffle} from './cards.js';
+import {chooseHint,unseen} from './hints.js';
 export function newGame(seed=Date.now(),draw=1){const cards=shuffle(deck(),seed),tableau=Array.from({length:7},()=>[]);for(let i=0;i<7;i++)for(let j=0;j<=i;j++){const c=cards.shift();c.up=j===i;tableau[i].push(c)}return {seed,draw,tableau,stock:cards,waste:[],foundations:Array.from({length:4},()=>[]),passes:0,moves:0}}
 export const clone=s=>structuredClone(s);
 export function canPlace(card,pile,type){if(type==='foundation')return pile.length?pile.at(-1).suit===card.suit&&pile.at(-1).rank+1===card.rank:card.rank===1;return pile.length?pile.at(-1).up&&pile.at(-1).red!==card.red&&pile.at(-1).rank===card.rank+1:card.rank===13}
@@ -9,6 +10,11 @@ if(!canPlace(group[0],dst,to.kind==='foundations'?'foundation':'tableau'))return
 src.splice(start);dst.push(...group);if(from.kind==='tableau'&&src.length)src.at(-1).up=true;n.moves++;return n}
 export function drawStock(s){const n=clone(s);if(n.stock.length){for(let i=0;i<n.draw&&n.stock.length;i++){const c=n.stock.pop();c.up=true;n.waste.push(c)}}else if(n.waste.length){n.stock=n.waste.reverse().map(c=>({...c,up:false}));n.waste=[];n.passes++}else return null;n.moves++;return n}
 export const won=s=>s.foundations.every(p=>p.length===13);
+export function hint(s,recent=[]) {
+  const progress=chooseHint(s,move,recent);if(progress)return progress;
+  const next=drawStock(s);
+  return next&&unseen(next,[s,...recent])?{type:'draw',reason:s.stock.length?'Try drawing from stock.':'Recycle the waste to reach other cards.'}:null;
+}
 export function validate(s) {
   if(!s||![1,3].includes(s.draw)||!Number.isFinite(s.seed)||
     ![s.moves,s.passes].every(n=>Number.isInteger(n)&&n>=0)||
