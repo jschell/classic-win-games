@@ -19,14 +19,17 @@ heuristics, not a proof that a deal can be won. Immediate improvements take
 priority. If none exists, a three-move beam search (width 12, at most 25 expanded
 positions) can suggest a temporary setup with a higher-valued endpoint. It
 does not exhaust every possible move sequence, inspect stock to choose a move,
-or guarantee the optimal move. A useful longer plan may be missed. No-result
+or guarantee the optimal move. The interface labels these as local nudges,
+with the three-move limit also available on the Hint button. A useful longer
+plan may be missed. No-result
 messages acknowledge the search limit rather than claiming the game is lost.
 
 Recent-position keys ignore move/pass counters, slot/column permutations,
 and interchangeable Spider copy IDs, retaining rank, suit, orientation and
 stock/waste order. Hints reject visited results and search paths. The last 128
 positions are stored separately for each game, survive refresh/game switching,
-and reset on a new/restarted deal or Klondike draw-mode change. Undo truncates
+and reset on a new/restarted deal. Changing Klondike Draw starts a new deal
+after confirmation. Undo truncates
 the abandoned branch so its move can be tried again. This bounds storage;
 positions older than the trail can eventually be revisited. Normal legal moves
 remain available even if the hint evaluator declines to recommend them.

@@ -9,16 +9,17 @@ and offline shell with Klondike. Select FreeCell in the game navigation or open
 - All 52 cards are face up, dealt round-robin into eight columns (7/7/7/7/6/6/6/6).
 - Four free cells each hold one exposed card. Any card may fill an empty column.
 - Build columns down by alternating color; homes ascend by suit from Ace to King.
-- Home moves are final, with Undo available during the current play session.
+- Home moves are final, with up to 100 saved Undo actions available.
 - An ordered sequence moves only if enough temporary space exists:
   `(empty cells + 1) * 2 ** usable empty columns`. An empty destination is excluded;
   a source that becomes empty is not counted as available beforehand.
 - Hints identify a legal local move, not a solution or a guarantee of winning.
 - New deal, Restart, numbered replay, Undo and separate per-game saves are available.
-  Undo history clears on refresh or game switching; the current board persists.
+  Undo history and the current board persist across refresh and game switching.
 - Deals use this project's deterministic shuffle, **not Microsoft's deal numbering**.
   Accepted numbers: 1–2147483647. Solvability is not guaranteed.
-- No automatic foundation moves, solver, timer or scoring beyond move count.
+- Double-click sends an exposed top card home. Finish is available only when a
+  foundation-only path completes the deal. No solver, timer or scoring beyond move count.
 
 Rule references checked October 29, 2026:
 [Brainium's FreeCell rules](https://brainium.helpshift.com/hc/en/8-freecell/faq/334-how-do-i-play-freecell/)

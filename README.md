@@ -17,7 +17,11 @@ The games use original browser-rendered cards rather than Microsoft artwork.
 
 Use Node.js 22+: `npm ci`, then `npm test` for deterministic rules, saved-state
 validation, and worker lifecycle checks. After changing any offline shell asset,
-run `npm run build:sw` and commit the regenerated `sw.js`; tests reject stale hashes.
+  run `npm run build:sw` and commit the regenerated `sw.js`; tests reject stale hashes.
+
+Run `npm run format` after editing source JavaScript and `npm run format:check`
+to check it. Prettier is a pinned development dependency; the app still has no
+runtime dependencies.
 
 For browser verification, run `npx playwright install --with-deps chromium webkit`
 and `npm run test:browser`. CI runs both engines and retains the HTML report,
@@ -27,7 +31,8 @@ See [the engineering report](docs/mobile-verification.md) for findings and limit
 
 ## Games
 
-- **Klondike:** Draw 1/3, hints, Undo and saved games.
+- **Klondike:** Draw 1/3, hints, Undo and saved games. Changing Draw asks to
+  start a new deal; cancelling keeps the current deal and its Undo history.
 - **FreeCell:** eight face-up columns, four cells, capacity-limited sequence moves,
   numbered deals, Restart, hints, Undo and its own saved game. Open `/#freecell`.
   Numbers use our own shuffle and do not match Windows deals. See [rules and
@@ -43,3 +48,15 @@ See [the engineering report](docs/mobile-verification.md) for findings and limit
   matches. Open `/#hearts`. See [rules and verification](docs/hearts.md).
 
 All four games work offline after the app shell has cached.
+
+Desktop users can drag cards and sequences to a destination. Klondike and
+FreeCell also support double-clicking an exposed top card to send it to a legal
+foundation. Tap-to-select/tap-to-place remains available on phones and desktop.
+**Finish game** enables only when foundation moves alone can complete a
+Klondike or FreeCell deal. The entire finish is one Undo action.
+
+Undo keeps the last 100 actions per saved game, including across refreshes and
+game switches; starting or restarting a deal clears that game's history.
+Existing saved boards remain compatible. Hints are bounded local nudges,
+searching up to three moves; they do not solve deals or guarantee a winning
+line. See [hint limits](docs/hints.md).
