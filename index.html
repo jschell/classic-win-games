@@ -1,1 +1,27 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123d32"><link rel="apple-touch-icon" href="./icons/icon-192.png"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><title>Classic Win Games</title></head><body><header><h1>Classic Win Games</h1><nav aria-label="Games"><strong>Klondike</strong><span>FreeCell · Spider · Hearts — coming next</span></nav></header><main><section class="toolbar"><label>Draw <select id="draw"><option value="1">1</option><option value="3">3</option></select></label><button id="new">New deal</button><button id="undo">Undo</button><button id="hint">Hint</button><span id="status" role="status"></span></section><p id="selection" role="status" aria-live="polite"></p><p id="storage-note" hidden>Saving is unavailable in this browser. Keep this page open to retain your game.</p><div id="board" aria-label="Klondike game board"><div id="top" class="piles"></div><div id="tableau" class="piles"></div></div><p class="help">Column labels show covered-card counts (↓). Tap or click a face-up card, then its destination. Tap the selected card again to cancel. Tap stock to draw; only the top waste card is playable. Select a card and tap a foundation to move it.</p></main><script type="module" src="./src/app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123d32"><link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><title>Classic Win Games</title>
+</head>
+<body>
+<header><h1>Classic Win Games</h1><nav aria-label="Games"><a href="#klondike">Klondike</a><a href="#freecell">FreeCell</a><span>Spider · Hearts — coming next</span></nav></header>
+<main>
+  <section class="toolbar" aria-label="Game controls">
+    <label id="draw-control">Draw <select id="draw"><option value="1">1</option><option value="3">3</option></select></label>
+    <button id="new">New deal</button><button id="restart">Restart</button><button id="undo">Undo</button><button id="hint">Hint</button>
+    <span id="status" role="status"></span>
+  </section>
+  <form id="deal-form" class="toolbar" hidden>
+    <label>Deal number <input id="deal-number" type="number" inputmode="numeric" min="1" max="2147483647" step="1" required></label>
+    <button type="submit">Play deal</button><span class="deal-note">Our own seeded deals; numbers differ from Windows.</span>
+  </form>
+  <p id="selection" role="status" aria-live="polite"></p>
+  <p id="storage-note" hidden>Saving is unavailable in this browser. Keep this page open to retain your game.</p>
+  <div id="board" aria-label="Klondike game board"><div id="top" class="piles"></div><div id="tableau" class="piles"></div></div>
+  <p id="help" class="help"></p>
+</main>
+<script type="module" src="./src/app.js"></script>
+</body>
+</html>
