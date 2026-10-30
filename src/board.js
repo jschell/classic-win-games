@@ -51,8 +51,8 @@ export function renderBoard({state,selected,onPile,game,top,tableau}) {
     state.completed.forEach((run,i)=>{
       const slot=document.createElement('div');slot.className='pile-slot';slot.dataset.kind='completed';
       const caption=document.createElement('span');caption.className='pile-caption';caption.textContent=`Run ${i+1}`;
-      const marker=document.createElement('span');marker.className='run-marker'+(run.length?' complete':'');
-      marker.setAttribute('role','img');marker.setAttribute('aria-label',`Run ${i+1} ${run.length?'complete':'empty'}`);
+      const marker=document.createElement('span');marker.className='run-marker'+(run.length?' complete'+(run[0].red?' red':''):'');
+      marker.setAttribute('role','img');marker.setAttribute('aria-label',`Run ${i+1} ${run.length?'complete, '+({'♠':'spades','♥':'hearts','♣':'clubs','♦':'diamonds'}[run[0].suit]):'empty'}`);
       marker.textContent=run.length?run[0].suit:'—';slot.append(caption,marker);top.append(slot);
     });
   } else {

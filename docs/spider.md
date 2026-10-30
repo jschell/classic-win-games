@@ -1,9 +1,14 @@
-# Spider Solitaire — one suit
+# Spider Solitaire — one, two and four suits
 
 Open `/#spider` under the project's Pages path or choose Spider in navigation.
-The first version offers one-suit Spider only. All 104 cards have distinct IDs,
-including eight copies of each spade rank. A seed reproduces the same deal using
-our own shuffle; numbers do not match Windows and solvability is not guaranteed.
+Choose **Suits** to play one suit (spades), two suits (spades/hearts), or four
+suits. Every mode uses 104 distinct IDs: eight copies per rank in one suit, four
+per rank/suit in two suits, and two per rank/suit in four suits. Red hearts and
+diamonds retain their symbols so color is not the only identifier.
+
+The same seed and suit count reproduce a deal using our own shuffle. One-suit
+deals are unchanged from earlier versions. Numbers do not match Windows and
+solvability is not guaranteed.
 
 ## Rules
 
@@ -11,7 +16,8 @@ our own shuffle; numbers do not match Windows and solvability is not guaranteed.
   Only the last card in each starts face up; 50 cards remain in stock.
 - Build columns down by rank. An exposed descending same-suit sequence moves
   together with no FreeCell-style capacity limit. Any card or valid sequence
-  may fill an empty column. Suit checks are explicit for later difficulty modes.
+  may fill an empty column. A sequence can land on the next higher rank of any suit. Mixed-suit
+  runs cannot move as a group; move their same-suit suffixes separately.
 - Stock deals one face-up card onto each column, in order, for five rows. Every
   column must contain a card before a row can be dealt. No unrestricted-deal rule.
 - A complete same-suit King-to-Ace run is removed automatically. Exposed covered
@@ -19,9 +25,13 @@ our own shuffle; numbers do not match Windows and solvability is not guaranteed.
   All eight completed runs win. Completed runs are display-only.
 - Undo reverses an entire action, including a stock row, run removal and reveals.
   History is session-only and resets when refreshing or switching games. Each
-  game's current board persists independently.
-- Restart and numbered replay use the same deterministic seed. Hints suggest
-  a legal local move (preferring reveals), or a stock deal; they are not a solver.
+  game's current board persists independently. Each Spider suit mode also has
+  its own board and hint trail. Switching modes resumes that board and clears
+  session Undo, just like switching games; it does not discard other boards.
+- Restart and numbered replay preserve the current suit mode and seed. Hints
+  evaluate reveals, completed runs, space and same-suit joins, including bounded
+  setup search and recent-position loop filtering; they are not a solver. See
+  [hint evaluation](hints.md).
 
 Rule references checked October 30, 2026:
 [MobilityWare rules](https://mobilityware.helpshift.com/hc/en/11-spider/faq/586-how-do-i-play-spider-solitaire/)
@@ -89,5 +99,41 @@ hints, and session-only Undo. These are explicit rather than changed game rules.
 
 Native iPhone
 Safari, standalone installation and real touch scrolling remain device checks;
-Linux WebKit results do not establish physical-device behavior. Two/four-suit UI,
-a solver, a timer and additional scoring are outside this version.
+Linux WebKit results do not establish physical-device behavior. A solver, a
+timer and additional scoring remain outside this version.
+
+
+## Multi-suit extension
+
+The mode selector remembers the most recently selected suit count. The original
+`classic-win-spider-v1` board stays in place for one suit. Two/four suits use
+`classic-win-spider-2-v1` and `classic-win-spider-4-v1`; hint trails have the same
+per-board separation. No old save is rewritten into a different deck. Saves
+validate each ID against the selected mode's canonical suit/rank/color mapping,
+including completed runs. Invalid or mismatched saves fall back to a new deal in
+the selected mode. Unsupported modes are rejected by the pure rules API.
+
+The existing move/settle rules now operate on parameterized decks. Red completed
+run markers display their suit and expose suit names to screen readers. Hints
+already count same-suit joins; candidate generation never treats a mixed-suit
+suffix as movable. Suit count is also included in position identity. Existing one-suit, FreeCell
+and Klondike hint keys retain their exact earlier encoding.
+
+`tests/spider-suits.test.js` adds 13 unit cases: deck distributions, invalid modes,
+seed replay, mixed/same-suit movement, rank-only destination placement, run
+completion and rejection, reveal/Undo snapshots, final win, stock exhaustion,
+save validation and 20 seeded hint walks per added mode without repeated
+positions. All **52 unit tests pass locally**.
+
+`tests/browser/spider-suits.spec.js` adds 16 scenarios per browser (32 checks
+in Chromium/WebKit), bringing the suite to 108: initial/mixed long columns at
+all five viewports, red/black rank/suit readability, fit/larger views, touch
+moves/rejection, hint choices, same-suit completion, final win/Undo, separate
+legacy/mode saves, remembered preference, replay/Restart, invalid preference/save recovery, blocked storage and offline switching.
+Source commit `36563ac382e4c03331715d06ebcf09f4246dbbb5` passed all **52 unit and
+108 browser tests** without retries in [CI run 41077797697](https://github.com/jschell/classic-win-games/actions/runs/41077797697).
+Reviewed real WebKit screenshots at 375px for [two suits](evidence/spider-2-suits-375.png)
+and [four suits](evidence/spider-4-suits-375.png), plus the four-suit desktop
+capture. The final compatibility/evidence commit retains old hint-key encoding
+and adds exact rendered rank/suit checks; its CI and production verification
+are recorded in the PR.

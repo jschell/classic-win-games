@@ -33,10 +33,10 @@ See [the engineering report](docs/mobile-verification.md) for findings and limit
   Numbers use our own shuffle and do not match Windows deals. See [rules and
   verification](docs/freecell.md).
 
-- **Spider:** one suit, ten columns, five stock rows, automatic run removal,
-  numbered replay, Restart, Undo and independent saves. Open `/#spider`.
+- **Spider:** one, two or four suits, ten columns, five stock rows, automatic run removal,
+  numbered replay, Restart, Undo and independent saves for each suit mode. Open `/#spider`.
   Choose Fit columns or Larger cards (horizontal scrolling). See [rules and
   verification](docs/spider.md).
 
 All three games work offline after the app shell has cached. Hearts remains
-planned; two/four-suit Spider modes are not exposed yet.
+planned.
