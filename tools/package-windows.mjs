@@ -2,10 +2,10 @@ import { readFile, mkdir, copyFile, writeFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkVersions } from './version.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const config = JSON.parse(await readFile(resolve(root, 'src-tauri/tauri.conf.json')));
-const version = config.version;
+const version = await checkVersions(root);
 const tag = process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : null;
 if (tag && tag !== `desktop-v${version}`) throw Error(`Tag ${tag} does not match desktop version ${version}`);
 const output = resolve(root, 'build/windows-release');

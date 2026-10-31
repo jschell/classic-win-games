@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tools/build-sw.mjs --check && node --test tests/*.test.js",
+    "test": "node tools/version.mjs --check && node tools/build-sw.mjs --check && node --test tests/*.test.js",
     "build:sw": "node tools/build-sw.mjs",
     "test:browser": "node tools/build-desktop.mjs && playwright test",
     "format": "prettier --write \"src/**/*.js\"",
@@ -11,11 +11,14 @@
     "build:desktop": "node tools/build-desktop.mjs",
     "desktop:dev": "tauri dev --no-dev-server",
     "build:windows": "tauri build --no-bundle -- --locked",
-    "test:desktop": "node tests/desktop/smoke.mjs"
+    "test:desktop": "node tests/desktop/smoke.mjs",
+    "version:bump": "node tools/version.mjs",
+    "version:check": "node tools/version.mjs --check"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
     "@tauri-apps/cli": "2.12.4",
     "prettier": "3.6.2"
-  }
+  },
+  "version": "0.1.0"
 }

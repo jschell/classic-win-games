@@ -2,6 +2,7 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 const root=process.cwd();
+const {version}=JSON.parse(await readFile(resolve(root,'package.json')));
 export async function deploymentServer() {
   const deployment={revision:1,fail:false,disconnected:false};
   const server=createServer(async(req,res)=>{
@@ -12,6 +13,7 @@ export async function deploymentServer() {
     try {
       let content=await readFile(path);
       if(path.endsWith('sw.js'))content=String(content).replace(/classic-win-games-([a-f0-9]+)/,`classic-win-games-$1-test-${deployment.revision}`);
+      if(path.endsWith('build-info.json'))content=JSON.stringify({version,revision:String(deployment.revision).repeat(40)});
       if(path.endsWith('app.js'))content=`document.documentElement.dataset.build='${deployment.revision}';\n`+content;
       const types={'.html':'text/html','.js':'text/javascript','.css':'text/css','.webmanifest':'application/manifest+json','.png':'image/png'};
       res.writeHead(200,{'Content-Type':types[extname(path)]||'application/octet-stream','Cache-Control':'no-store'});res.end(content);
