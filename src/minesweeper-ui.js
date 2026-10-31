@@ -59,6 +59,13 @@ export function createMinesweeperView({ root, onCommit }) {
       newBoard();
     }
   });
+  window.addEventListener("pointerup", (event) => {
+    held.delete(event.button);
+    if (!root.contains(event.target)) {
+      chordIndex = null;
+      suppressClick = false;
+    }
+  });
   function render(next) {
     stop();
     state = next;
@@ -67,6 +74,9 @@ export function createMinesweeperView({ root, onCommit }) {
     const scroll = root.querySelector(".mine-scroll"),
       scrollLeft = scroll?.scrollLeft || 0,
       scrollTop = scroll?.scrollTop || 0;
+    const focusedControl = root.contains(document.activeElement)
+      ? document.activeElement.id
+      : "";
     const focused = root.contains(document.activeElement)
       ? document.activeElement.dataset.cell
       : undefined;
@@ -112,6 +122,7 @@ export function createMinesweeperView({ root, onCommit }) {
     const questions = el("label"),
       check = el("input");
     check.type = "checkbox";
+    check.id = "mine-questions";
     check.checked = state.questions;
     check.onchange = () => act(mines.setQuestions(state, check.checked));
     questions.append(check, " Question marks");
@@ -277,6 +288,8 @@ export function createMinesweeperView({ root, onCommit }) {
       grid
         .querySelector(`[data-cell="${focusIndex}"]`)
         ?.focus({ preventScroll: true });
+    else if (focusedControl)
+      root.querySelector(`#${focusedControl}`)?.focus({ preventScroll: true });
   }
   return { render, snapshot, stop };
 }
