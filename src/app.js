@@ -425,7 +425,10 @@ $("hint").onclick = () => {
       "No improving hint found within three moves. You can try another move, Undo, or restart.",
     );
 };
-if ("serviceWorker" in navigator) {
+if (
+  document.documentElement.dataset.packaged !== "desktop" &&
+  "serviceWorker" in navigator
+) {
   // A worker update is activated only after its complete shell has cached.
   // Reload once on replacement so old JS cannot keep running with new assets.
   let controlled = Boolean(navigator.serviceWorker.controller),

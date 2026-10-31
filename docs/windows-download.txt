@@ -1,0 +1,29 @@
+Classic Win Games - Windows x64 executable
+
+Run the .exe to play. No application installer is required.
+If using the ZIP, extract it before launching the executable.
+
+Requires Windows 11 x64 and Microsoft Edge WebView2 Runtime.
+WebView2 is normally present on Windows 11. If the app cannot start, install
+the Evergreen WebView2 Runtime from Microsoft:
+https://developer.microsoft.com/microsoft-edge/webview2/
+For a disconnected PC, download Microsoft's Evergreen Standalone Installer
+on another computer and transfer it. This small game executable does not
+contain the full WebView2 Runtime.
+
+All four games are embedded and play without an internet connection.
+The executable has no application auto-updater. To update, close the game
+and replace the old executable with the new one.
+
+Saves and up to 100 Undo actions are kept in your Windows user profile under
+%LOCALAPPDATA%\com.jschell.classic-win-games\
+Keep this data directory when replacing the executable. Saves do not travel
+with the executable and are separate from the browser/PWA's saves.
+Save export/import is not included in this first desktop version.
+
+The initial build is unsigned. Windows security policies can warn or prevent
+launching unsigned downloads. Check the SHA256 hash against checksums.txt;
+do not disable system protection settings to run the app.
+
+Source, browser version and instructions:
+https://github.com/jschell/classic-win-games

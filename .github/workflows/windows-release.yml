@@ -1,0 +1,100 @@
+name: Windows executable
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    tags: ['desktop-v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          cache-on-failure: true
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm test
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+      - name: Build the release executable with locked dependencies
+        run: npm run build:windows
+      - name: Install matching Edge WebDriver
+        run: |
+          cargo install --git https://github.com/chippers/msedgedriver-tool --rev 8c4b34f51b45f5cf08013366d703de464ab871d1 --locked
+          msedgedriver-tool
+      # Elevated runners ignore WebView2 debug-port environment variables since
+      # Runtime 150. Apply the supported machine policy only to this app on CI.
+      # https://github.com/MicrosoftEdge/WebView2Feedback/issues/5645
+      - name: Allow WebDriver on the disposable runner
+        shell: pwsh
+        run: |
+          $key = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArguments'
+          New-Item -Path $key -Force | Out-Null
+          New-ItemProperty -Path $key -Name 'classic-win-games.exe' -Value '--remote-debugging-port=9222 --remote-debugging-address=127.0.0.1' -PropertyType String -Force | Out-Null
+      - name: Exercise the packaged Windows app
+        run: npm run test:desktop
+      - name: Remove the runner-only WebView2 policy
+        if: always()
+        shell: pwsh
+        run: |
+          $key = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArguments'
+          Remove-ItemProperty -Path $key -Name 'classic-win-games.exe' -ErrorAction SilentlyContinue
+      - name: Stage the executable and instructions
+        run: node tools/package-windows.mjs
+      - name: Create optional ZIP and checksum
+        shell: pwsh
+        run: |
+          $version = (Get-Content src-tauri/tauri.conf.json | ConvertFrom-Json).version
+          $name = "ClassicWinGames-$version-windows-x64"
+          Compress-Archive -Path "build/windows-release/$name.exe",build/windows-release/README.txt -DestinationPath "build/windows-release/$name.zip"
+          $hash = (Get-FileHash "build/windows-release/$name.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          Add-Content -Path build/windows-release/checksums.txt -Value "$hash  $name.zip" -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: classic-win-games-windows-x64
+          path: build/windows-release/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-desktop-evidence
+          path: build/desktop-evidence/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  draft-release:
+    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: classic-win-games-windows-x64
+          path: release-assets
+      - name: Create a draft release for review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release-assets/* --draft --verify-tag --title "Classic Win Games ${GITHUB_REF_NAME#desktop-v}" --notes-file docs/windows-release-notes.md
