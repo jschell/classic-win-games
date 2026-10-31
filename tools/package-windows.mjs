@@ -1,4 +1,4 @@
-import { readFile, mkdir, copyFile, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, copyFile, writeFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,7 @@ const version = config.version;
 const tag = process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : null;
 if (tag && tag !== `desktop-v${version}`) throw Error(`Tag ${tag} does not match desktop version ${version}`);
 const output = resolve(root, 'build/windows-release');
+await rm(output, {recursive:true, force:true});
 await mkdir(output, {recursive:true});
 const name = `ClassicWinGames-${version}-windows-x64.exe`;
 const source = resolve(root, 'src-tauri/target/release/classic-win-games.exe');
