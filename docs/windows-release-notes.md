@@ -1,4 +1,4 @@
-Windows x64 executable for Classic Win Games: Klondike, FreeCell, Spider and Hearts.
+Windows x64 executable for Classic Win Games: Klondike, FreeCell, Spider, Hearts and Minesweeper.
 
 - Download the `.exe`, or extract the optional ZIP, then launch the game.
 - Requires Windows 11 x64 and Microsoft Edge WebView2 Runtime. The runtime is
@@ -9,7 +9,7 @@ Windows x64 executable for Classic Win Games: Klondike, FreeCell, Spider and Hea
 - This initial executable is unsigned. Actual launch behavior depends on Windows
   security policy. SHA-256 hashes are in `checksums.txt`.
 
-The Windows CI workflow builds the release executable and exercises all four
+The Windows CI workflow builds the release executable and exercises all five
 games, mouse shortcuts, saved Undo after process restart and worker exclusion.
 The release remains a draft for review. A clean disconnected-PC runtime setup
 test, physical touch/scaling review and an upgrade from a previous published

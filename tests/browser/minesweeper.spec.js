@@ -36,7 +36,9 @@ test('wrong chord flags lose; Replay keeps the mines and a new minefield resets 
   const s=field();s.revealed[9]=true;s.status='playing';s.marks[0]=1;s.marks[18]=1;
   await load(page,s);await cell(page,9).tap();await expect(page.locator('#mine-status')).toHaveText('Mine hit. Game over.');
   const lost=await saved(page);expect(m.validate(lost)).toBe(true);expect(lost.status).toBe('lost');
-  await cell(page,20).tap();expect((await saved(page)).revealed).toEqual(lost.revealed);
+  await expect(cell(page,20)).toBeDisabled();
+  // A late pointer event must still be harmless, independently of aria-disabled.
+  await cell(page,20).tap({force:true});expect((await saved(page)).revealed).toEqual(lost.revealed);
   page.once('dialog',d=>d.accept());await page.locator('#mine-replay').tap();
   expect((await saved(page)).mines).toEqual(s.mines);await expect(page.locator('#mine-status')).toContainText('first reveal can lose');
   await cell(page,0).tap();await expect(page.locator('#mine-status')).toContainText('Game over');
@@ -75,6 +77,7 @@ test('all safe squares win without flags and corrupt saves recover',async({page}
   await load(page,s);await cell(page,79).tap();await expect(page.locator('#mine-status')).toHaveText('You won!');
   expect((await saved(page)).status).toBe('won');expect(m.validate(await saved(page))).toBe(true);
   await page.getByRole('link',{name:'FreeCell',exact:true}).tap();
+  await expect(page.locator('main')).toHaveAttribute('data-game','freecell');
   await page.evaluate(key=>localStorage.setItem(key,JSON.stringify({game:'minesweeper',version:1,difficulty:'expert',mines:[]})),key);
   await page.getByRole('link',{name:'Minesweeper',exact:true}).tap();
   await expect(page.locator('.mine-cell')).toHaveCount(81);await expect(page.locator('#mine-status')).toContainText('Reveal a square');

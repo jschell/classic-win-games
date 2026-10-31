@@ -156,7 +156,8 @@ function loadGame(mode) {
   render();
 }
 window.addEventListener("hashchange", () => {
-  persist();
+  if (game === "minesweeper") saveMineClock();
+  else persist();
   loadGame();
 });
 function persist() {
