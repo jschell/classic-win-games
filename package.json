@@ -9,7 +9,7 @@
     "format": "prettier --write \"src/**/*.js\"",
     "format:check": "prettier --check \"src/**/*.js\"",
     "build:desktop": "node tools/build-desktop.mjs",
-    "desktop:dev": "tauri dev",
+    "desktop:dev": "tauri dev --no-dev-server",
     "build:windows": "tauri build --no-bundle -- --locked",
     "test:desktop": "node tests/desktop/smoke.mjs"
   },

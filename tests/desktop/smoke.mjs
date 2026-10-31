@@ -39,7 +39,7 @@ async function until(check, description, timeout = 20000) {
   throw Error(`Timed out: ${description}\n${driverLog}`);
 }
 async function start() {
-  const value = await command('POST', '/session', {capabilities:{alwaysMatch:{'tauri:options':{application:app}}}});
+  const value = await command('POST', '/session', {capabilities:{alwaysMatch:{'tauri:options':{application:app,webviewOptions:{}}}}});
   session = value.sessionId;
   await until(()=>script('return !!document.querySelector("main[data-game]")'), 'frontend startup');
   assert.equal(await script('return document.documentElement.dataset.packaged'), 'desktop');

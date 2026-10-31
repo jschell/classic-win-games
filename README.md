@@ -49,16 +49,6 @@ See [the engineering report](docs/mobile-verification.md) for findings and limit
 
 All four games work offline after the app shell has cached.
 
-## Windows executable
-
-A Tauri wrapper builds the shared game into a Windows x64 executable. Run
-`npm run build:windows` on Windows with the documented prerequisites. The
-Windows workflow tests the packaged app and produces an executable, optional
-ZIP and checksums. Version tags create draft releases; normal merges continue
-deploying only the web/PWA edition. See [Windows instructions](docs/windows.md)
-for WebView2 requirements, save locations, release procedure and remaining
-manual verification. The executable does not bundle the full WebView2 runtime.
-
 Desktop users can drag cards and sequences to a destination. Klondike and
 FreeCell also support double-clicking an exposed top card to send it to a legal
 foundation. Tap-to-select/tap-to-place remains available on phones and desktop.
@@ -70,3 +60,14 @@ game switches; starting or restarting a deal clears that game's history.
 Existing saved boards remain compatible. Hints are bounded local nudges,
 searching up to three moves; they do not solve deals or guarantee a winning
 line. See [hint limits](docs/hints.md).
+
+## Windows executable
+
+A Tauri wrapper builds the shared game into a Windows x64 executable. Run
+`npm run build:windows` on Windows with the documented prerequisites. The
+Windows workflow tests the packaged app and produces an executable, optional
+ZIP and checksums. Version tags create draft releases; normal merges continue
+deploying only the web/PWA edition. See [Windows instructions](docs/windows.md)
+for WebView2 requirements, save locations, release procedure and remaining
+manual verification. The executable does not bundle the full WebView2 runtime.
+
