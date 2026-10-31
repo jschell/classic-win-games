@@ -1,6 +1,6 @@
 [package]
 name = "classic-win-games"
-version = "0.3.0"
+version = "0.4.0"
 description = "Offline classic card games"
 authors = ["J. Schell"]
 edition = "2021"

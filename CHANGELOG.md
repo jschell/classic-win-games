@@ -4,6 +4,8 @@ Version bumps move these notes into a numbered section. Review the notes before 
 
 ## [Unreleased]
 
+## [0.4.0]
+
 - Add Minesweeper with three presets, mouse/keyboard/touch controls, safe openings, exact-field replay and independent offline saves.
 
 ## [0.3.0]
