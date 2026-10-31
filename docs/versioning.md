@@ -28,10 +28,10 @@ versions stay unchanged. It refuses inconsistent metadata before writing.
 Review the numbered changelog notes, commit all changes, and open a PR.
 `npm run version:check` also runs as part of `npm test`.
 
-To create the tag through GitHub Actions, use a release PR whose squash-merge
-commit title starts with `[desktop-release] `, for example
+To create the tag through GitHub Actions, use a release PR whose title starts with `[desktop-release] `, for example
 `[desktop-release] Release 0.3.0`. After that explicit release commit reaches
-main, **Tag desktop release** verifies the shared version, creates an annotated
+main (including a normal GitHub merge with the PR title in its commit body),
+**Tag desktop release** verifies the shared version, creates an annotated
 `desktop-v<version>` tag at that commit, and dispatches the Windows workflow
 against the tag. The workflow refuses to move an existing tag. It can also be
 run manually on main. Ordinary merge titles do not trigger tagging.

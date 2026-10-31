@@ -3,7 +3,7 @@ name: Tag desktop release
 on:
   push:
     branches: [main]
-    paths: [package.json]
+    paths: [package.json, .github/workflows/desktop-tag.yml]
   workflow_dispatch:
 
 permissions:
@@ -18,7 +18,7 @@ jobs:
     if: >-
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'workflow_dispatch' ||
-       startsWith(github.event.head_commit.message, '[desktop-release] '))
+       contains(github.event.head_commit.message, '[desktop-release] '))
     runs-on: ubuntu-latest
     permissions:
       contents: write
