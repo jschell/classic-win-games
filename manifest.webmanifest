@@ -1,5 +1,5 @@
 {
-  "id":"./", "name":"Classic Win Games", "short_name":"Card Games",
+  "id":"./", "name":"Classic Win Games", "short_name":"Win Games",
   "start_url":"./", "scope":"./", "display":"standalone",
   "background_color":"#123d32", "theme_color":"#123d32",
   "icons":[

@@ -1,6 +1,6 @@
 # Classic Win Games
 
-Offline-first, desktop- and mobile-friendly recreations of four classic Windows card games: Klondike, FreeCell, Spider, and Hearts.
+Offline-first, desktop- and mobile-friendly recreations of five classic Windows games: Klondike, FreeCell, Spider, Hearts, and Minesweeper.
 
 Built with vanilla JavaScript, HTML, and CSS. No backend or runtime CDN.
 
@@ -10,6 +10,7 @@ Built with vanilla JavaScript, HTML, and CSS. No backend or runtime CDN.
 2. FreeCell — implemented
 3. Spider Solitaire (one, two and four suits) — implemented
 4. Hearts with local computer opponents — implemented
+5. Minesweeper with three difficulties, flags and replay — implemented
 
 The games use original browser-rendered cards rather than Microsoft artwork.
 
@@ -67,7 +68,12 @@ procedure](docs/versioning.md) and [changelog](CHANGELOG.md).
   selection, visible trick review, moon scoring, matches to 100, Undo and saved
   matches. Open `/#hearts`. See [rules and verification](docs/hearts.md).
 
-All four games work offline after the app shell has cached.
+- **Minesweeper:** Beginner, Intermediate and Expert minefields, safe fresh opening,
+  flags/question marks, neighboring-cell reveals, timer, exact-board replay and
+  independent saves. Open `/#minesweeper`. Mouse, keyboard and touch flag mode;
+  large boards scroll. See [mechanics, evidence and verification](docs/minesweeper.md).
+
+All five games work offline after the app shell has cached.
 
 Desktop users can drag cards and sequences to a destination. Klondike and
 FreeCell also support double-clicking an exposed top card to send it to a legal
