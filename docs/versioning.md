@@ -28,7 +28,16 @@ versions stay unchanged. It refuses inconsistent metadata before writing.
 Review the numbered changelog notes, commit all changes, and open a PR.
 `npm run version:check` also runs as part of `npm test`.
 
-After the PR merges and checks pass, tag the intended main commit:
+To create the tag through GitHub Actions, use a release PR whose squash-merge
+commit title starts with `[desktop-release] `, for example
+`[desktop-release] Release 0.3.0`. After that explicit release commit reaches
+main, **Tag desktop release** verifies the shared version, creates an annotated
+`desktop-v<version>` tag at that commit, and dispatches the Windows workflow
+against the tag. The workflow refuses to move an existing tag. It can also be
+run manually on main. Ordinary merge titles do not trigger tagging.
+
+Alternatively, after the PR merges and checks pass, tag the intended main commit
+from your own checkout:
 
 ```sh
 git switch main
@@ -40,8 +49,9 @@ git push origin desktop-v0.1.1
 Replace the example tag with the actual version. Packaging rejects a tag that
 does not match the app version. The tag workflow builds/tests Windows and creates
 a draft GitHub Release with versioned exe/ZIP files and checksums. Review the
-release notes and manual acceptance checks before publishing. PRs and normal
-merges do not create tags or public releases. Do not move an already published
+release notes and manual acceptance checks before publishing. PRs and ordinary
+merges do not create tags or public releases. Explicit release merges create a
+tag and draft only; publication remains separate. Do not move an already published
 tag; fix issues in a new patch release.
 
 ## About on web and Windows

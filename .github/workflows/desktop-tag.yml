@@ -1,0 +1,55 @@
+name: Tag desktop release
+
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-tag
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       startsWith(github.event.head_commit.message, '[desktop-release] '))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify shared version and offline cache
+        run: |
+          node tools/version.mjs --check
+          node tools/build-sw.mjs --check
+      - name: Create the version tag and start its release build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')
+          tag="desktop-v$version"
+          if git show-ref --verify --quiet "refs/tags/$tag"; then
+            echo "Tag $tag already exists; refusing to move or recreate it."
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag -a "$tag" "$GITHUB_SHA" -m "Classic Win Games $version"
+          git push origin "refs/tags/$tag"
+          # GITHUB_TOKEN tag pushes do not trigger other workflows. An explicit
+          # dispatch does, and using the tag ref makes the existing draft job run.
+          gh workflow run windows-release.yml --repo "$GITHUB_REPOSITORY" --ref "$tag"
+          echo "Created $tag at $GITHUB_SHA and dispatched the Windows release build." >> "$GITHUB_STEP_SUMMARY"

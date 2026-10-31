@@ -4,6 +4,10 @@ Version bumps move these notes into a numbered section. Review the notes before 
 
 ## [Unreleased]
 
+## [0.3.0]
+
+- Add explicit release-merge tagging and dispatch of the Windows draft-release build.
+
 - Show the shared app version and build commit in About on web and Windows.
 - Add one command to bump the shared version, synchronized metadata and offline cache.
 

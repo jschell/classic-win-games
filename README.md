@@ -43,8 +43,9 @@ npm run version:bump -- patch
 
 Use `minor` for new features or `major` for a major release. The command updates
 all version metadata, the changelog and offline cache together; `npm test` checks
-that versions agree. Review and merge the bump PR, then create the matching
-`desktop-v<version>` tag to build a draft Windows release. Ordinary merges do
+that versions agree. Review the bump PR and squash-merge with a title starting `[desktop-release] `
+to create its `desktop-v<version>` tag and build a draft Windows release.
+You can also create the matching tag manually. Ordinary merges do
 not bump versions or publish Windows releases. See [versioning and release
 procedure](docs/versioning.md) and [changelog](CHANGELOG.md).
 
