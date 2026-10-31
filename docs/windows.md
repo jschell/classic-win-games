@@ -83,8 +83,9 @@ Screenshots and driver logs are retained. They use WebDriver against the release
 executable; no debug/test commands are compiled into the product.
 
 Run `test:desktop` only on disposable Windows CI (`CI=true`); it loads fixtures
-into that runner's app profile. It needs `tauri-driver` and a matching Edge
-WebDriver. The workflow provisions both. On the disposable elevated runner,
+into that runner's app profile. It needs a matching Edge WebDriver, provisioned by the workflow. The test
+launches the executable normally, then attaches the driver to it; driver launch
+mode would create a new temporary profile and invalidate persistence checks. On the disposable elevated runner,
 it temporarily sets the app-specific machine WebView2 debug-port policy needed
 by Runtime 150+ and removes it afterward. This policy is never shipped or set
 on users' PCs. See [Microsoft's explanation](https://github.com/MicrosoftEdge/WebView2Feedback/issues/5645). The normal Chromium/WebKit tests also
@@ -100,5 +101,5 @@ runtime does not prove missing-runtime installation. Record results in the relea
 
 - [Tauri Windows prerequisites and installers](https://v2.tauri.app/distribute/windows-installer/)
 - [Tauri window configuration](https://v2.tauri.app/reference/config/)
-- [Tauri Windows WebDriver CI](https://v2.tauri.app/develop/tests/webdriver/ci/)
+- [Tauri Windows WebDriver CI](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/webdriver)
 - [Microsoft WebView2 distribution](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution)

@@ -36,8 +36,6 @@ jobs:
       - run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
       - name: Build the release executable with locked dependencies
         run: npm run build:windows
-      - name: Install the WebDriver bridge
-        run: cargo install tauri-driver --version 0.1.5 --locked
       - name: Install matching Edge WebDriver
         run: |
           cargo install --git https://github.com/chippers/msedgedriver-tool --rev 8c4b34f51b45f5cf08013366d703de464ab871d1 --locked
@@ -50,7 +48,7 @@ jobs:
         run: |
           $key = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArguments'
           New-Item -Path $key -Force | Out-Null
-          New-ItemProperty -Path $key -Name 'classic-win-games.exe' -Value '--remote-debugging-port=0' -PropertyType String -Force | Out-Null
+          New-ItemProperty -Path $key -Name 'classic-win-games.exe' -Value '--remote-debugging-port=9222 --remote-debugging-address=127.0.0.1' -PropertyType String -Force | Out-Null
       - name: Exercise the packaged Windows app
         run: npm run test:desktop
       - name: Remove the runner-only WebView2 policy

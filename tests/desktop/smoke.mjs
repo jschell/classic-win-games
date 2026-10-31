@@ -16,8 +16,8 @@ if (process.env.CI !== 'true') throw Error('Run these fixture-based tests on a d
 const evidence = resolve('build/desktop-evidence');
 await mkdir(evidence, {recursive:true});
 const app = resolve('src-tauri/target/release/classic-win-games.exe');
-const driver = spawn('tauri-driver', ['--native-driver', resolve('msedgedriver.exe')], {stdio:['ignore','pipe','pipe']});
-let driverLog = '', session;
+const driver = spawn(resolve('msedgedriver.exe'), ['--port=4444'], {stdio:['ignore','pipe','pipe']});
+let driverLog = '', session, appProcess;
 for (const stream of [driver.stdout, driver.stderr]) stream.on('data', bytes => {driverLog += bytes;});
 driver.on('error', error => {driverLog += String(error);});
 const base = 'http://127.0.0.1:4444';
@@ -41,14 +41,35 @@ async function until(check, description, timeout = 20000) {
   throw Error(`Timed out: ${description}\n${driverLog}`);
 }
 async function start() {
-  const value = await command('POST', '/session', {capabilities:{alwaysMatch:{'tauri:options':{application:app,webviewOptions:{}}}}});
+  // Launch outside WebDriver: its launch mode substitutes a temporary profile,
+  // which would invalidate the real save/Undo persistence check.
+  appProcess = spawn(app, [], {stdio:'ignore'});
+  appProcess.on('error', error => {driverLog += String(error);});
+  await until(async()=>{
+    const response = await fetch('http://127.0.0.1:9222/json/version', {signal:AbortSignal.timeout(2000)});
+    return response.ok;
+  }, 'app debugging endpoint');
+  const value = await command('POST', '/session', {capabilities:{alwaysMatch:{
+    browserName:'webview2', 'ms:edgeOptions':{debuggerAddress:'127.0.0.1:9222'}
+  }}});
   session = value.sessionId;
   await until(()=>script('return !!document.querySelector("main[data-game]")'), 'frontend startup');
   assert.equal(await script('return document.documentElement.dataset.packaged'), 'desktop');
   assert.equal(await script('return location.origin'), 'https://tauri.localhost');
 }
 async function stop() {
-  if (session) { await command('DELETE', `/session/${session}`); session = undefined; await pause(700); }
+  if (appProcess && appProcess.exitCode === null) {
+    const pid = appProcess.pid;
+    await promisify(execFile)('pwsh', ['-NoProfile','-Command',
+      `if (!(Get-Process -Id ${pid}).CloseMainWindow()) { throw 'Could not close the app window' }`]);
+    await until(()=>appProcess.exitCode !== null, 'app process exit');
+  }
+  appProcess = undefined;
+  if (session) {
+    await command('DELETE', `/session/${session}`).catch(()=>{});
+    session = undefined;
+  }
+  await pause(700);
 }
 const key = game => `classic-win-${game}-v1`;
 async function saved(game) { return JSON.parse(await script('return localStorage.getItem(arguments[0])', key(game))); }
@@ -152,7 +173,7 @@ try {
   if(session)await screenshot('failure').catch(()=>{});
   throw error;
 } finally {
-  await stop().catch(()=>{});
+  await stop().catch(()=>{appProcess?.kill();});
   driver.kill();
   await writeFile(resolve(evidence,'driver.log'),driverLog);
 }
