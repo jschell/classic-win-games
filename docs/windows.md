@@ -66,8 +66,10 @@ adds the optional ZIP and its checksum. `npm run desktop:dev` opens a developmen
 build; distribute only the release binary produced by `build:windows`.
 
 Rust and CLI versions are pinned; commit both lockfiles when updating dependencies.
-Keep `src-tauri/Cargo.toml` and `tauri.conf.json` versions aligned. Release tags
-must be `desktop-v<version>`.
+Use `npm run version:bump -- patch|minor|major` to update all app versions
+together. Release tags must be `desktop-v<version>`. See the [shared versioning
+and release procedure](versioning.md); About below the board identifies this
+executable's version and build commit.
 
 ## CI and publication
 

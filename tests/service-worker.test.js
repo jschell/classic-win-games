@@ -16,7 +16,7 @@ async function request(w,path) {
   let response;w.listeners.fetch({request:new Request('https://example.com'+path),respondWith:p=>response=p});return response;
 }
 test('complete shell stages before activation; unrelated caches survive',async()=>{
-  const w=worker();await lifecycle(w,'install');assert.ok(w.skipped);assert.equal(w.store.size,17);
+  const w=worker();await lifecycle(w,'install');assert.ok(w.skipped);assert.equal(w.store.size,20);
   await lifecycle(w,'activate');assert.ok(w.claimed);assert.deepEqual(w.deleted,['classic-win-games-v3']);
 });
 test('failed precache never skips waiting',async()=>{

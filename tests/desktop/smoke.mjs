@@ -10,6 +10,7 @@ import { puzzle } from '../browser/fixtures.js';
 import { freePuzzle, almostWon } from '../browser/freecell-fixtures.js';
 import * as spider from '../../src/spider.js';
 import * as hearts from '../../src/hearts.js';
+import { APP_VERSION } from '../../src/version.js';
 
 if (process.platform !== 'win32') throw Error('Desktop smoke tests require Windows');
 if (process.env.CI !== 'true') throw Error('Run these fixture-based tests on a disposable CI runner');
@@ -56,6 +57,9 @@ async function start() {
   await until(()=>script('return !!document.querySelector("main[data-game]")'), 'frontend startup');
   assert.equal(await script('return document.documentElement.dataset.packaged'), 'desktop');
   assert.equal(await script('return location.origin'), 'https://tauri.localhost');
+  await until(()=>script('return /^[a-f0-9]{40}$/.test(document.querySelector("#app-version").title)'), 'embedded build identity');
+  assert.equal(await script('return document.querySelector("#app-version").textContent'), `${APP_VERSION} · ${process.env.GITHUB_SHA.slice(0,7)}`);
+  assert.equal(await script('return document.querySelector("#app-edition").textContent'), 'Windows edition');
 }
 async function stop() {
   if (appProcess && appProcess.exitCode === null) {

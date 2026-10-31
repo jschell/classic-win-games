@@ -2,11 +2,14 @@ import { readdir, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
+import { buildInfo } from './build-info.mjs';
+import { checkVersions } from './version.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 export const desktopOutput = resolve(root, 'build/desktop-web');
 
 export async function buildDesktop(output = desktopOutput) {
+  await checkVersions(root);
   const modules = (await readdir(resolve(root, 'src'))).filter(name => name.endsWith('.js')).sort();
   const paths = ['index.html', 'style.css', ...modules.map(name => `src/${name}`),
     'icons/icon-192.png', 'icons/icon-512.png'];
@@ -17,6 +20,7 @@ export async function buildDesktop(output = desktopOutput) {
   html = html.replace('<html lang="en">', '<html lang="en" data-packaged="desktop">')
     .replace(/<link rel="manifest"[^>]*>/, '');
   files.set('index.html', Buffer.from(html));
+  files.set('build-info.json', Buffer.from(JSON.stringify(await buildInfo(root))+'\n'));
   // Rebuild from an allowlist so old caches, tests and dependencies cannot leak
   // into the executable. Source assets are never modified during staging.
   await rm(output, {recursive:true, force:true});

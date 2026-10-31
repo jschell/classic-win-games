@@ -29,6 +29,25 @@ viewport screenshots and failure traces in the `browser-evidence` artifact.
 Tests cover five viewport sizes, touch gameplay and offline/updated deployments.
 See [the engineering report](docs/mobile-verification.md) for findings and limits.
 
+## Versions and releases
+
+Open **About** below the board in the web or Windows edition to see its app
+version and build commit. `package.json` holds the shared version; each edition
+identifies its own deployed build, so web and Windows can be on different builds.
+
+To prepare a numbered release, run one command:
+
+```sh
+npm run version:bump -- patch
+```
+
+Use `minor` for new features or `major` for a major release. The command updates
+all version metadata, the changelog and offline cache together; `npm test` checks
+that versions agree. Review and merge the bump PR, then create the matching
+`desktop-v<version>` tag to build a draft Windows release. Ordinary merges do
+not bump versions or publish Windows releases. See [versioning and release
+procedure](docs/versioning.md) and [changelog](CHANGELOG.md).
+
 ## Games
 
 - **Klondike:** Draw 1/3, hints, Undo and saved games. Changing Draw asks to

@@ -9,6 +9,10 @@ import { positionKey } from "./hints.js";
 import { appendHistory, loadHistory, saveGame } from "./history.js";
 import { toFoundation, finishGame } from "./shortcuts.js";
 
+import { showAbout } from "./about.js";
+
+showAbout();
+
 const $ = (id) => document.getElementById(id);
 const games = { klondike, freecell, spider, hearts };
 const names = {

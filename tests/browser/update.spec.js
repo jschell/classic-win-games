@@ -11,6 +11,8 @@ test('updated deployment switches two open tabs to one shell and preserves game'
     const saved=await first.evaluate(()=>localStorage.getItem('classic-win-klondike-v1'));
     const second=await context.newPage();await second.goto(url);
     await expect(second.locator('html')).toHaveAttribute('data-build','1');
+    await first.locator('#about summary').click();
+    await expect(first.locator('#app-version')).toContainText('1111111');
     // A failed installation must not replace the working shell.
     deployment.revision=2;deployment.fail=true;
     await first.evaluate(async()=>{const reg=await navigator.serviceWorker.getRegistration();await reg.update().catch(()=>{});});
@@ -25,6 +27,8 @@ test('updated deployment switches two open tabs to one shell and preserves game'
       expect(await page.evaluate(()=>localStorage.getItem('classic-win-klondike-v1'))).toBe(saved);
     }
     deployment.disconnected=true;await second.reload();
+    await second.locator('#about summary').click();
+    await expect(second.locator('#app-version')).toContainText('3333333');
     await expect(second.locator('html')).toHaveAttribute('data-build','3');
     await expect(second.locator('.stack')).toHaveCount(7);
   } finally {await deployment.close();}
