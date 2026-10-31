@@ -2,7 +2,8 @@
 // the runner's app profile. The exact release executable is exercised through
 // WebDriver; no test commands or debug features are added to the shipped app.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { puzzle } from '../browser/fixtures.js';
@@ -94,13 +95,14 @@ try {
   const rects = await script('return arguments[0].map(s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:Math.round(r.x+12),y:Math.round(r.y+12)}})',
     [`[data-card-id="${queen}"]`, '[data-kind="tableau"][data-index="1"] .card']);
   const [from,to] = rects;
-  await pointer([
-    {type:'pointerMove',duration:0,origin:'viewport',...from},
-    {type:'pointerDown',button:0},{type:'pause',duration:150},
-    {type:'pointerMove',duration:150,origin:'viewport',x:from.x+10,y:from.y+10},
-    {type:'pointerMove',duration:500,origin:'viewport',...to},
-    {type:'pause',duration:150},{type:'pointerUp',button:0}
-  ]);
+  await script(`window.dragEvents=[]; for(const type of ['dragstart','dragover','drop','dragend']) document.addEventListener(type,e=>window.dragEvents.push({type,trusted:e.isTrusted,target:e.target.dataset.cardId}),true); return true`);
+  const scale = await script('return devicePixelRatio');
+  await promisify(execFile)('pwsh', ['-NoProfile','-File',resolve('tests/desktop/drag.ps1'),
+    '-FromX',String(from.x),'-FromY',String(from.y),'-ToX',String(to.x),'-ToY',String(to.y),'-Scale',String(scale)]);
+  await pause(200);
+  const dragEvents = await script('return window.dragEvents');
+  await writeFile(resolve(evidence,'drag-events.json'),JSON.stringify(dragEvents,null,2));
+  assert.ok(dragEvents.some(e=>e.type==='drop' && e.trusted),'Windows mouse input produces a trusted drop');
   assert.equal((await saved('klondike')).tableau[1].length,3,'native HTML drag moves the whole sequence');
   await screenshot('klondike');
 

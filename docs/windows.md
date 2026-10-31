@@ -77,7 +77,7 @@ GitHub Release after the Windows job passes. Normal merges do not automatically
 publish desktop releases. The existing Pages deployment continues independently.
 
 The automated native checks cover all four games, real mouse double-click and
-HTML dragging, a stock row, Hearts passing, Finish/Undo, confirmation cancellation,
+HTML dragging through Windows mouse input, a stock row, Hearts passing, Finish/Undo, confirmation cancellation,
 saved deal/Undo after a process restart, and absence of worker registrations.
 Screenshots and driver logs are retained. They use WebDriver against the release
 executable; no debug/test commands are compiled into the product.
