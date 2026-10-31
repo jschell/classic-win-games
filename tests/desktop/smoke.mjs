@@ -10,6 +10,7 @@ import { puzzle } from '../browser/fixtures.js';
 import { freePuzzle, almostWon } from '../browser/freecell-fixtures.js';
 import * as spider from '../../src/spider.js';
 import * as hearts from '../../src/hearts.js';
+import * as mines from '../../src/minesweeper.js';
 import { APP_VERSION } from '../../src/version.js';
 
 if (process.platform !== 'win32') throw Error('Desktop smoke tests require Windows');
@@ -85,7 +86,7 @@ async function fixture(game, state) {
   await route(game);
   await script('localStorage.setItem(arguments[0],JSON.stringify(arguments[1])); return true', key(game), state);
   await command('POST', `/session/${session}/refresh`, {});
-  await until(()=>script('return document.querySelector("main")?.dataset.game===arguments[0] && document.querySelector("#status")?.textContent.includes("123")', game), `${game} fixture`);
+  await until(()=>script('return document.querySelector("main")?.dataset.game===arguments[0] && (arguments[0] === "minesweeper" ? !!document.querySelector("#mine-status") : document.querySelector("#status")?.textContent.includes("123"))', game), `${game} fixture`);
 }
 async function element(selector) {
   return command('POST', `/session/${session}/element`, {using:'css selector',value:selector});
@@ -157,6 +158,24 @@ try {
   assert.ok(hearts.validate(match));assert.notEqual(match.phase,'pass');
   await screenshot('hearts');
 
+  await fixture('minesweeper',mines.newGame(123));
+  await click('[data-cell="40"]');
+  const mineState = await saved('minesweeper');
+  assert.equal(mines.validate(mineState),true);
+  assert.equal(mines.clues(mineState)[40],0);
+  await click('#mine-flag-mode');
+  const covered = mineState.revealed.findIndex(v=>!v);
+  await click(`[data-cell="${covered}"]`);
+  const marked = await saved('minesweeper');
+  assert.equal(marked.marks[covered],1);
+  await screenshot('minesweeper');
+  await stop(); await start(); await route('minesweeper');
+  const restored = await saved('minesweeper');
+  assert.deepEqual(restored.mines,marked.mines);
+  assert.deepEqual(restored.revealed,marked.revealed);
+  assert.deepEqual(restored.marks,marked.marks);
+  assert.ok(restored.elapsedMs >= marked.elapsedMs);
+
   // JS native dialogs are used by New deal/Restart/Draw. Exercise the real
   // WebView2 confirmation and reject it so the saved deal remains unchanged.
   await route('klondike');
@@ -169,7 +188,7 @@ try {
   });
   assert.equal(registrations,0,'packaged app has no service worker');
   await writeFile(resolve(evidence,'result.json'),JSON.stringify({passed:true,checks:[
-    'all four games','mouse double-click','native HTML drag','saved deal and Undo after process restart',
+    'all five games','Minesweeper opening and flag persistence','mouse double-click','native HTML drag','saved deal and Undo after process restart',
     'Finish and Undo','native confirmation cancellation','no service worker'
   ]},null,2));
   console.log('Windows packaged-app smoke tests passed');

@@ -7,7 +7,7 @@ test('About identifies the web build across games',async({page})=>{
   await page.locator('#about summary').click();
   await expect(page.locator('#app-version')).toHaveText(`${APP_VERSION} · abcdef0`);
   await expect(page.locator('#app-edition')).toHaveText('Web edition');
-  for(const game of ['FreeCell','Spider','Hearts','Klondike']) {
+  for(const game of ['FreeCell','Spider','Hearts','Minesweeper','Klondike']) {
     await page.getByRole('link',{name:game,exact:true}).tap();
     await expect(page.locator('#app-version')).toHaveText(`${APP_VERSION} · abcdef0`);
   }
