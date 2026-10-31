@@ -24,7 +24,8 @@ test('updated deployment switches two open tabs to one shell and preserves game'
     await first.evaluate(async()=>{const reg=await navigator.serviceWorker.getRegistration();await reg.update().catch(()=>{});});
     for(const page of [first,second]) {
       await expect(page.locator('html')).toHaveAttribute('data-build','3');
-      expect(await page.evaluate(()=>localStorage.getItem('classic-win-klondike-v1'))).toBe(saved);
+      // controllerchange can trigger another navigation between DOM and storage checks.
+      await expect.poll(()=>page.evaluate(()=>localStorage.getItem('classic-win-klondike-v1')).catch(()=>null)).toBe(saved);
     }
     deployment.disconnected=true;await second.reload();
     await second.locator('#about summary').click();
