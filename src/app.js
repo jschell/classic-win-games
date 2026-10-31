@@ -486,12 +486,24 @@ if (
     })
     .catch(() => {});
 }
+function saveMineClock() {
+  if (game !== "minesweeper") return;
+  try {
+    const stored = localStorage.getItem(key);
+    // A different tab/import may have replaced this save. Clock-only writes
+    // must not overwrite that newer board while this document is closing.
+    if (stored === null || stored === JSON.stringify(state)) persist();
+  } catch {
+    $("storage-note").hidden = false;
+  }
+}
 const minesView = createMinesweeperView({
   root: $("minesweeper-board"),
   onCommit: commit,
+  onTimerSave: saveMineClock,
 });
 window.addEventListener("pagehide", () => {
-  persist();
+  saveMineClock();
   minesView.stop();
 });
 window.addEventListener("pageshow", (event) => {

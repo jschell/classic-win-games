@@ -1,6 +1,6 @@
 import * as mines from "./minesweeper.js";
 
-export function createMinesweeperView({ root, onCommit }) {
+export function createMinesweeperView({ root, onCommit, onTimerSave }) {
   let state,
     active = false,
     startedAt = null,
@@ -46,7 +46,15 @@ export function createMinesweeperView({ root, onCommit }) {
     return true;
   }
   document.addEventListener("visibilitychange", () => {
-    if (active) onCommit(snapshot());
+    if (!active) return;
+    state = snapshot();
+    startedAt =
+      state.status === "playing" && !document.hidden ? Date.now() : null;
+    if (state.status === "playing")
+      root.querySelector("#mine-status").textContent = document.hidden
+        ? "Paused while hidden."
+        : "Reveal every safe square to win.";
+    onTimerSave();
   });
   window.addEventListener("blur", () => {
     held.clear();
