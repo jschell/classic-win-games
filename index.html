@@ -6,9 +6,9 @@
   <link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><title>Classic Win Games</title>
 </head>
 <body>
-<header><h1>Classic Win Games</h1><nav aria-label="Games"><a href="#klondike">Klondike</a><a href="#freecell">FreeCell</a><a href="#spider">Spider</a><a href="#hearts">Hearts</a></nav></header>
+<header><h1>Classic Win Games</h1><nav aria-label="Games"><a href="#klondike">Klondike</a><a href="#freecell">FreeCell</a><a href="#spider">Spider</a><a href="#hearts">Hearts</a><a href="#minesweeper">Minesweeper</a></nav></header>
 <main>
-  <section class="toolbar" aria-label="Game controls">
+  <section id="game-controls" class="toolbar" aria-label="Game controls">
     <label id="draw-control">Draw <select id="draw"><option value="1">1</option><option value="3">3</option></select></label>
     <button id="new">New deal</button><button id="restart">Restart</button><button id="undo">Undo</button><button id="hint">Hint</button><button id="finish" hidden>Finish game</button>
     <span id="status" role="status"></span>
@@ -25,6 +25,7 @@
   <p id="storage-note" hidden>Saving is unavailable in this browser. Keep this page open to retain your game.</p>
   <div id="board" aria-label="Klondike game board"><div id="top" class="piles"></div><div id="tableau-scroll" tabindex="0" role="region" aria-label="Card columns"><div id="tableau" class="piles"></div></div></div>
   <section id="hearts-board" aria-label="Hearts game board" hidden></section>
+  <section id="minesweeper-board" aria-label="Minesweeper game board" hidden></section>
   <p id="help" class="help"></p>
 </main>
 <footer><details id="about"><summary>About</summary><p>Classic Win Games · <span id="app-edition"></span></p><p id="app-version"></p></details></footer>

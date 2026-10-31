@@ -16,7 +16,7 @@ async function request(w,path) {
   let response;w.listeners.fetch({request:new Request('https://example.com'+path),respondWith:p=>response=p});return response;
 }
 test('complete shell stages before activation; unrelated caches survive',async()=>{
-  const w=worker();await lifecycle(w,'install');assert.ok(w.skipped);assert.equal(w.store.size,20);
+  const w=worker();await lifecycle(w,'install');assert.ok(w.skipped);assert.equal(w.store.size,22);
   await lifecycle(w,'activate');assert.ok(w.claimed);assert.deepEqual(w.deleted,['classic-win-games-v3']);
 });
 test('failed precache never skips waiting',async()=>{
@@ -24,6 +24,6 @@ test('failed precache never skips waiting',async()=>{
 });
 test('versioned shell is served offline without networking; unowned resources untouched',async()=>{
   const w=worker();await lifecycle(w,'install');w.offline();
-  for(const path of ['/classic-win-games/','/classic-win-games/index.html','/classic-win-games/src/app.js','/classic-win-games/style.css','/classic-win-games/src/freecell.js','/classic-win-games/src/board.js','/classic-win-games/src/spider.js','/classic-win-games/src/hints.js','/classic-win-games/src/hearts.js','/classic-win-games/src/hearts-ui.js','/classic-win-games/#hearts','/classic-win-games/#spider','/classic-win-games/#freecell','/classic-win-games/index.html#klondike'])assert.ok((await request(w,path)).ok);
+  for(const path of ['/classic-win-games/','/classic-win-games/index.html','/classic-win-games/src/app.js','/classic-win-games/style.css','/classic-win-games/src/freecell.js','/classic-win-games/src/board.js','/classic-win-games/src/spider.js','/classic-win-games/src/hints.js','/classic-win-games/src/hearts.js','/classic-win-games/src/hearts-ui.js','/classic-win-games/src/minesweeper.js','/classic-win-games/src/minesweeper-ui.js','/classic-win-games/#minesweeper','/classic-win-games/#hearts','/classic-win-games/#spider','/classic-win-games/#freecell','/classic-win-games/index.html#klondike'])assert.ok((await request(w,path)).ok);
   assert.equal(w.network,0);assert.equal(await request(w,'/other-app/'),undefined);
 });

@@ -2,6 +2,8 @@ import * as klondike from "./klondike.js";
 import * as freecell from "./freecell.js";
 import * as spider from "./spider.js";
 import * as hearts from "./hearts.js";
+import * as minesweeper from "./minesweeper.js";
+import { createMinesweeperView } from "./minesweeper-ui.js";
 import { createHeartsView } from "./hearts-ui.js";
 import { renderBoard, pileCards } from "./board.js";
 import { label } from "./cards.js";
@@ -14,12 +16,13 @@ import { showAbout } from "./about.js";
 showAbout();
 
 const $ = (id) => document.getElementById(id);
-const games = { klondike, freecell, spider, hearts };
+const games = { klondike, freecell, spider, hearts, minesweeper };
 const names = {
   klondike: "Klondike",
   freecell: "FreeCell",
   spider: "Spider",
   hearts: "Hearts",
+  minesweeper: "Minesweeper",
 };
 let game,
   engine,
@@ -32,7 +35,7 @@ let state,
 let boardState = null,
   finishState = null;
 function remember() {
-  if (game === "hearts") return;
+  if (["hearts", "minesweeper"].includes(game)) return;
   const fingerprint = positionKey(state);
   if (recent.at(-1) !== fingerprint) recent.push(fingerprint);
   recent = recent.slice(-128);
@@ -41,6 +44,7 @@ function remember() {
   } catch {}
 }
 function loadGame(mode) {
+  minesView.stop();
   game = Object.hasOwn(games, location.hash.slice(1))
     ? location.hash.slice(1)
     : "klondike";
@@ -74,7 +78,10 @@ function loadGame(mode) {
     state = fresh();
   }
   try {
-    history = loadHistory(localStorage, key, state, engine.validate);
+    history =
+      game === "minesweeper"
+        ? []
+        : loadHistory(localStorage, key, state, engine.validate);
   } catch {
     history = [];
   }
@@ -83,7 +90,7 @@ function loadGame(mode) {
   } catch {
     recent = [];
   }
-  if (game === "hearts") recent = [];
+  if (["hearts", "minesweeper"].includes(game)) recent = [];
   else if (
     !Array.isArray(recent) ||
     recent.some((p) => typeof p !== "string") ||
@@ -99,10 +106,12 @@ function loadGame(mode) {
   $("new").textContent = game === "hearts" ? "New game" : "New deal";
   $("deal-label").textContent =
     game === "hearts" ? "Match number" : "Deal number";
-  $("board").hidden = game === "hearts";
+  $("board").hidden = ["hearts", "minesweeper"].includes(game);
+  $("game-controls").hidden = game === "minesweeper";
+  $("minesweeper-board").hidden = game !== "minesweeper";
   $("hearts-board").hidden = game !== "hearts";
   $("draw-control").hidden = game !== "klondike";
-  $("deal-form").hidden = game === "klondike";
+  $("deal-form").hidden = ["klondike", "minesweeper"].includes(game);
   $("finish").hidden = !["klondike", "freecell"].includes(game);
   $("hint").title =
     game === "hearts"
@@ -122,16 +131,19 @@ function loadGame(mode) {
   $("deal-number").value = String(state.seed);
   $("board").setAttribute("aria-label", `${names[game]} game board`);
   $("help").textContent =
-    game === "hearts"
-      ? "Hearts · Lowest score wins when someone reaches 100. Pass left, right, across, then hold. Open with 2♣ and follow suit. No penalty discard on trick one unless forced. Lead hearts only after a heart is played, or with only hearts left. Hearts score 1 each, Q♠ scores 13; taking all 26 adds 26 to everyone else. Tap a white card to select it, then Play selected card. Collect each completed trick when ready. Undo includes the following computer plays. Opponents use their own hands and public cards."
-      : game === "spider"
-        ? `Spider · ${spiderSuits} ${spiderSuits === 1 ? "suit" : "suits"}. Build down by rank regardless of suit. Only descending same-suit sequences move together; a mixed-suit stack must be separated. Any card or movable sequence can fill an empty column. Complete same-suit King-to-Ace runs are removed automatically. Fill every column before dealing a row. Each suit mode keeps its own saved deal. Tap again to cancel selection. Larger cards scroll sideways; long columns scroll down.`
-        : game === "freecell"
-          ? "Build columns down in alternating colors. Any card can fill an empty column. Each cell holds one card. Build homes from Ace to King by suit. Tap an exposed card or sequence, then its destination; tap again to cancel. Sequence moves require enough empty cells and columns."
-          : "Column labels show covered-card counts (↓). Tap or click a face-up card, then its destination. Tap the selected card again to cancel. Tap stock to draw; only the top waste card is playable. Select a card and tap a foundation to move it.";
-  $("help").textContent +=
-    " Undo keeps the last 100 actions, including after reload.";
-  if (game !== "hearts")
+    game === "minesweeper"
+      ? "Reveal every safe square; flags are optional. Fresh fields open a clear area. Replay keeps the same mines, so the first reveal can lose. Right-click to cycle flag/question/clear; left+right or middle-click a revealed number to clear neighbors when its flag count matches. Wrong flags can cause a loss. On touch, use Flag mode to mark and tap a revealed number to clear around it. Keyboard: arrows move, Enter/Space activate, F marks, C clears around, F2 starts a new field. Expert scrolls sideways. Time pauses while hidden. No hints or Undo."
+      : game === "hearts"
+        ? "Hearts · Lowest score wins when someone reaches 100. Pass left, right, across, then hold. Open with 2♣ and follow suit. No penalty discard on trick one unless forced. Lead hearts only after a heart is played, or with only hearts left. Hearts score 1 each, Q♠ scores 13; taking all 26 adds 26 to everyone else. Tap a white card to select it, then Play selected card. Collect each completed trick when ready. Undo includes the following computer plays. Opponents use their own hands and public cards."
+        : game === "spider"
+          ? `Spider · ${spiderSuits} ${spiderSuits === 1 ? "suit" : "suits"}. Build down by rank regardless of suit. Only descending same-suit sequences move together; a mixed-suit stack must be separated. Any card or movable sequence can fill an empty column. Complete same-suit King-to-Ace runs are removed automatically. Fill every column before dealing a row. Each suit mode keeps its own saved deal. Tap again to cancel selection. Larger cards scroll sideways; long columns scroll down.`
+          : game === "freecell"
+            ? "Build columns down in alternating colors. Any card can fill an empty column. Each cell holds one card. Build homes from Ace to King by suit. Tap an exposed card or sequence, then its destination; tap again to cancel. Sequence moves require enough empty cells and columns."
+            : "Column labels show covered-card counts (↓). Tap or click a face-up card, then its destination. Tap the selected card again to cancel. Tap stock to draw; only the top waste card is playable. Select a card and tap a foundation to move it.";
+  if (game !== "minesweeper")
+    $("help").textContent +=
+      " Undo keeps the last 100 actions, including after reload.";
+  if (!["hearts", "minesweeper"].includes(game))
     $("help").textContent +=
       " On desktop, drag a card or sequence to its destination. Hints are local nudges, not a solution guide.";
   if (["klondike", "freecell"].includes(game))
@@ -144,11 +156,17 @@ function loadGame(mode) {
   render();
 }
 window.addEventListener("hashchange", () => {
-  persist();
+  if (game === "minesweeper") saveMineClock();
+  else persist();
   loadGame();
 });
 function persist() {
   try {
+    if (game === "minesweeper") {
+      state = minesView.snapshot();
+      localStorage.setItem(key, JSON.stringify(state));
+      return;
+    }
     saveGame(localStorage, key, state, history);
   } catch {
     $("storage-note").hidden = false;
@@ -156,6 +174,12 @@ function persist() {
 }
 function commit(next) {
   if (!next) return;
+  if (game === "minesweeper") {
+    state = next;
+    render();
+    persist();
+    return;
+  }
   history = appendHistory(history, state);
   state = next;
   selected = null;
@@ -251,6 +275,11 @@ function dropCard(from, to) {
   else render("Move unavailable. Check the destination and sequence rules.");
 }
 function render(message = "") {
+  if (game === "minesweeper") {
+    $("selection").textContent = "";
+    minesView.render(state);
+    return;
+  }
   if (game === "hearts") {
     $("status").textContent =
       `Hand ${state.handNumber + 1} · Trick ${Math.min(13, state.tricks.length + 1)}/13 · Match ${state.seed}`;
@@ -458,6 +487,30 @@ if (
     })
     .catch(() => {});
 }
+function saveMineClock() {
+  if (game !== "minesweeper") return;
+  try {
+    const stored = localStorage.getItem(key);
+    // A different tab/import may have replaced this save. Clock-only writes
+    // must not overwrite that newer board while this document is closing.
+    if (stored === null || stored === JSON.stringify(state)) persist();
+  } catch {
+    $("storage-note").hidden = false;
+  }
+}
+const minesView = createMinesweeperView({
+  root: $("minesweeper-board"),
+  onCommit: commit,
+  onTimerSave: saveMineClock,
+});
+window.addEventListener("pagehide", () => {
+  saveMineClock();
+  minesView.stop();
+});
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) loadGame();
+});
+
 const heartsView = createHeartsView({
   root: $("hearts-board"),
   onCommit: commit,

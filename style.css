@@ -107,3 +107,16 @@ nav a[aria-current="page"] {font-weight:700;border-color:#ffd451}
 footer {padding:12px;font-size:.9rem;color:#d3e8db}
 footer summary {cursor:pointer;min-height:44px;display:list-item;align-content:center}
 footer p {margin:6px 0;overflow-wrap:anywhere}
+
+/* Keep large minefields inside their own scroll area; never shrink touch targets. */
+#minesweeper-board {min-width:0;background:#164e3e;padding:12px;border-radius:12px}
+.mine-counters {display:flex;gap:24px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.mine-scroll {max-width:100%;overflow:auto;padding:3px;overscroll-behavior:contain}
+.mine-grid {display:grid;grid-template-columns:repeat(var(--mine-columns),32px);width:max-content;gap:1px;background:#657a72;border:2px solid #657a72}
+.mine-cell {width:32px;height:32px;padding:0;border:2px outset #d6e3db;border-radius:1px;background:#d9e2dc;color:#102d25;font-weight:800;font-size:20px;line-height:1;touch-action:manipulation}
+.mine-cell.open {border:1px solid #a9bab0;background:#edf1e9}
+.mine-cell[data-clue="1"] {color:#164dc0}.mine-cell[data-clue="2"] {color:#17612b}.mine-cell[data-clue="3"] {color:#a91d20}.mine-cell[data-clue="4"] {color:#452b91}
+.mine-cell[data-clue="5"],.mine-cell[data-clue="6"],.mine-cell[data-clue="7"],.mine-cell[data-clue="8"] {color:#122e27}
+.mine-cell.exploded,.mine-cell.wrong {background:#ffb1a0}
+#minesweeper-board input {min-width:24px;min-height:24px;vertical-align:middle}
+@media(pointer:coarse) {.mine-grid {grid-template-columns:repeat(var(--mine-columns),44px)}.mine-cell {width:44px;height:44px}}
