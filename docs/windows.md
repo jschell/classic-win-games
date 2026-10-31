@@ -84,7 +84,10 @@ executable; no debug/test commands are compiled into the product.
 
 Run `test:desktop` only on disposable Windows CI (`CI=true`); it loads fixtures
 into that runner's app profile. It needs `tauri-driver` and a matching Edge
-WebDriver. The workflow provisions both. The normal Chromium/WebKit tests also
+WebDriver. The workflow provisions both. On the disposable elevated runner,
+it temporarily sets the app-specific machine WebView2 debug-port policy needed
+by Runtime 150+ and removes it afterward. This policy is never shipped or set
+on users' PCs. See [Microsoft's explanation](https://github.com/MicrosoftEdge/WebView2Feedback/issues/5645). The normal Chromium/WebKit tests also
 exercise the staged frontend separately from the web/PWA deployment.
 
 Before publishing the draft, manually verify a clean disconnected Windows VM

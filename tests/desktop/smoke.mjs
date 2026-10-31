@@ -22,6 +22,7 @@ driver.on('error', error => {driverLog += String(error);});
 const base = 'http://127.0.0.1:4444';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function command(method, path, body) {
+  console.log(`${method} ${path}`);
   const response = await fetch(base + path, {method,
     headers:body ? {'Content-Type':'application/json'} : {},
     body:body ? JSON.stringify(body) : undefined, signal:AbortSignal.timeout(60000)});
