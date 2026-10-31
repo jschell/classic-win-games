@@ -1,0 +1,20 @@
+import { readFile, mkdir, copyFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const config = JSON.parse(await readFile(resolve(root, 'src-tauri/tauri.conf.json')));
+const version = config.version;
+const tag = process.env.GITHUB_REF_TYPE === 'tag' ? process.env.GITHUB_REF_NAME : null;
+if (tag && tag !== `desktop-v${version}`) throw Error(`Tag ${tag} does not match desktop version ${version}`);
+const output = resolve(root, 'build/windows-release');
+await mkdir(output, {recursive:true});
+const name = `ClassicWinGames-${version}-windows-x64.exe`;
+const source = resolve(root, 'src-tauri/target/release/classic-win-games.exe');
+const bytes = await readFile(source);
+if (bytes[0] !== 0x4d || bytes[1] !== 0x5a) throw Error('Expected a Windows PE executable');
+await copyFile(source, resolve(output, name));
+await copyFile(resolve(root, 'docs/windows-download.txt'), resolve(output, 'README.txt'));
+await writeFile(resolve(output, 'checksums.txt'), `${createHash('sha256').update(bytes).digest('hex')}  ${name}\n`);
+console.log(`Packaged ${name}: ${bytes.length} bytes`);
