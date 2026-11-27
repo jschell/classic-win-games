@@ -4,6 +4,9 @@ Version bumps move these notes into a numbered section. Review the notes before 
 
 ## [Unreleased]
 
+- Disable Hint once a Klondike, FreeCell or Spider deal is won, instead of suggesting Undo or restart.
+- Celebrate solitaire wins with bouncing finished cards that leave a trail; any tap, click or key clears them, and reduced-motion settings skip it.
+
 ## [0.4.0]
 
 - Add Minesweeper with three presets, mouse/keyboard/touch controls, safe openings, exact-field replay and independent offline saves.

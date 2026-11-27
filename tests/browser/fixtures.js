@@ -21,3 +21,9 @@ export function longColumn() {
   s.tableau=[[...covered,...sequence],[],[],[],[],[],[]];
   s.stock=available.map(c=>({...c,up:false}));return s;
 }
+// Every card home: a finished deal, as saved after the winning move.
+export function won() {
+  const s=newGame(123),cards=[...s.stock,...s.tableau.flat()].map(c=>({...c,up:true}));
+  s.foundations=['♠','♥','♣','♦'].map(suit=>cards.filter(c=>c.suit===suit).sort((a,b)=>a.rank-b.rank));
+  s.tableau=s.tableau.map(()=>[]);s.stock=[];s.waste=[];return s;
+}

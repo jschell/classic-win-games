@@ -120,3 +120,6 @@ footer p {margin:6px 0;overflow-wrap:anywhere}
 .mine-cell.exploded,.mine-cell.wrong {background:#ffb1a0}
 #minesweeper-board input {min-width:24px;min-height:24px;vertical-align:middle}
 @media(pointer:coarse) {.mine-grid {grid-template-columns:repeat(var(--mine-columns),44px)}.mine-cell {width:44px;height:44px}}
+
+/* Win celebration overlay; input passes through, and any tap, click or key removes it. */
+.celebration {position:fixed;inset:0;width:100vw;height:100vh;z-index:10;pointer-events:none}

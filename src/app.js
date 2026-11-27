@@ -10,6 +10,7 @@ import { label } from "./cards.js";
 import { positionKey } from "./hints.js";
 import { appendHistory, loadHistory, saveGame } from "./history.js";
 import { toFoundation, finishGame } from "./shortcuts.js";
+import { celebrate } from "./celebrate.js";
 
 import { showAbout } from "./about.js";
 
@@ -33,7 +34,33 @@ let state,
   selected = null,
   recent = [];
 let boardState = null,
-  finishState = null;
+  finishState = null,
+  stopCelebration = () => {};
+const solitaire = () => ["klondike", "freecell", "spider"].includes(game);
+// Launch from each home pile (or Spider run marker) with the cards it holds.
+function startCelebration() {
+  stopCelebration();
+  const spiderGame = game === "spider";
+  const anchors = [
+    ...$("top").querySelectorAll(
+      spiderGame
+        ? '[data-kind="completed"] .run-marker'
+        : '[data-kind="foundations"] .pile > *',
+    ),
+  ];
+  const piles = spiderGame ? state.completed : state.foundations;
+  if (anchors.length !== piles.length) return;
+  stopCelebration = celebrate({
+    origins: anchors.map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left, y: r.top, w: r.width, h: r.width * 1.4 };
+    }),
+    piles,
+    onDone: () => {
+      stopCelebration = () => {};
+    },
+  });
+}
 function remember() {
   if (["hearts", "minesweeper"].includes(game)) return;
   const fingerprint = positionKey(state);
@@ -44,6 +71,7 @@ function remember() {
   } catch {}
 }
 function loadGame(mode) {
+  stopCelebration();
   minesView.stop();
   game = Object.hasOwn(games, location.hash.slice(1))
     ? location.hash.slice(1)
@@ -113,6 +141,8 @@ function loadGame(mode) {
   $("draw-control").hidden = game !== "klondike";
   $("deal-form").hidden = ["klondike", "minesweeper"].includes(game);
   $("finish").hidden = !["klondike", "freecell"].includes(game);
+  // Solitaire render() disables Hint once won; Hearts manages its own plays.
+  $("hint").disabled = false;
   $("hint").title =
     game === "hearts"
       ? "Suggest a legal play"
@@ -149,6 +179,9 @@ function loadGame(mode) {
   if (["klondike", "freecell"].includes(game))
     $("help").textContent +=
       " Double-click an exposed card to send it home. Finish game becomes available when foundation moves can complete the deal; Undo reverses the whole finish.";
+  if (solitaire())
+    $("help").textContent +=
+      " Winning sets the finished cards bouncing; tap, click or press any key to clear them.";
   if (game === "hearts") {
     state = hearts.advanceComputers(state);
     persist();
@@ -181,11 +214,14 @@ function commit(next) {
     return;
   }
   history = appendHistory(history, state);
+  const winning = solitaire() && !engine.won(state) && engine.won(next);
   state = next;
   selected = null;
   remember();
   persist();
   render();
+  // Only the move that wins celebrates; reloading a won deal stays quiet.
+  if (winning) startCelebration();
 }
 function clickPile(kind, index, start) {
   if (kind === "stock") {
@@ -320,8 +356,10 @@ function render(message = "") {
         String(Boolean(samePile && start === selected.start)),
       );
   }
+  const over = engine.won(state);
   $("finish").disabled = !finishState;
-  $("status").textContent = engine.won(state)
+  $("hint").disabled = over;
+  $("status").textContent = over
     ? "You won!"
     : `Moves: ${state.moves} · Deal: ${state.seed}` +
       (game === "spider"
@@ -347,6 +385,7 @@ function render(message = "") {
   $("undo").disabled = !history.length;
 }
 function deal(seed) {
+  stopCelebration();
   history = [];
   state =
     game === "klondike"
@@ -405,6 +444,7 @@ $("deal-form").onsubmit = (e) => {
 };
 $("undo").onclick = () => {
   if (history.length) {
+    stopCelebration();
     state = history.pop();
     selected = null;
     const i = game === "hearts" ? -1 : recent.lastIndexOf(positionKey(state));
@@ -437,6 +477,11 @@ $("hint").onclick = () => {
     return;
   }
   selected = null;
+  // The button is disabled once won; this covers stale or scripted clicks.
+  if (engine.won(state)) {
+    render("You won! Start a new deal to play again.");
+    return;
+  }
   const hint = engine.hint(state, recent);
   if (hint?.type === "move") {
     selected = { ...hint.from, start: hint.start };
