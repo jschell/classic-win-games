@@ -4,6 +4,8 @@ Version bumps move these notes into a numbered section. Review the notes before 
 
 ## [Unreleased]
 
+## [0.5.0]
+
 - Disable Hint once a Klondike, FreeCell or Spider deal is won, instead of suggesting Undo or restart.
 - Celebrate solitaire wins with bouncing finished cards that leave a trail; any tap, click or key clears them, and reduced-motion settings skip it.
 
